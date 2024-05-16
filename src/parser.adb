@@ -1,6 +1,6 @@
-package body stack_ops is
+package body Parser is
 
-   procedure switch_ops (op: String, label : String, argument: String) is
+      procedure switch_ops (op: String, label : String, argument: String) is
       -- Group 1: (local, argument, this, that)
       -- Group 2 (temp)
       -- Group 3 (static)
@@ -18,7 +18,7 @@ package body stack_ops is
 --  A=LCL + A  // Calculate the memory address of the local variable
 --  M=D  // Store the value from the stack into the local variable
 
-               when "argument" => 
+               when "argument" =>
                when "this" =>
                when "that" =>
 -- Group 2 (temp)
@@ -35,7 +35,7 @@ package body stack_ops is
 -- Group 1: (local, argument, this, that)
             case label is
                when "local" =>
-               when "argument" => 
+               when "argument" =>
                when "this" =>
                when "that" =>
 -- Group 2 (temp)
@@ -50,7 +50,10 @@ package body stack_ops is
             end case;
       end case;
    end switch_ops;
-   
-   
 
-end stack_ops;
+   --------------------------------------------------------------------------------------------------------------------------
+   procedure parse_Instruction (Line : String) is
+   begin
+   end parse_Instruction;
+
+end Parser;
