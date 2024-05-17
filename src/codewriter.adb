@@ -2,6 +2,15 @@ with Ada.Text_IO;
 use Ada.Text_IO;
 
 package body CodeWriter is
+   file: File_Type;
+   file_name : String := "";
+   
+   procedure init_f (f: File_Type; n : String)is
+   begin
+      file := f;
+      file_name := n;
+   end init_f;
+   
 --     procedure write_add (arg1: String, arg2: String) is
 --  --  // vm command: add
 --  --  @SP		// A = 0
@@ -26,99 +35,159 @@ package body CodeWriter is
    procedure push_local (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@" & argument'Image); -- A = argument
+      Put_Line(File => file, Item => "D = A");                 -- D = A = argument
+                                                               
+      Put_Line(File => file, Item => "@LCL");
+      Put_Line(File => file, Item => "A = M + D");
+      Put_Line(File => file, Item => "D = M");
 
       Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
-      Put_Line(File => file, Item => "A = M - 1");           -- A = RAM[0] - 1
-      Put_Line(File => file, Item => "D = M");                --  D = RAM[A] = VALUE OF *SP - 1
-       
-      Put_Line(File => file, Item => "@LCL");                 -- A = LCL = 1 // usually
-      Put_Line(File => file, Item => "A = M");                -- A = RAM[LCL] = value of first (segment start addr)
-      declare 
-         i : Integer := argument;
-         begin
-            while i /= 0 loop
-               Put_Line(File => file, Item => "A = A + 1"); -- A = A + argument = offset of LCL segment (from start)
-               i := i - 1;
-            end loop;                 
-         end;
-      Put_Line(File => file, Item => "M = D");                -- RAM[ RAM[LCL] + argument ] = the value in LCL + offset 
+      Put_Line(File => file, Item => "A = M");                -- A = RAM[A] = top of stack
+      Put_Line(File => file, Item => "M = D");                -- M = RAM[A] = RAM[top of stack] = D = argument
       
-      Put_Line(File => file, Item => "@SP");                   -- A = SP = 0
-      Put_Line(File => file, Item => "M = M - 1");          -- RAM[0] = RAM[0] - 1 = next available place in memory
-      Put_Line(File => file, Item => "A = M");
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
 
-      Close(file);
-
+      Close(file);     
    end push_local;
    
    procedure push_argument (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@ARG");               -- A = argument segment
+      Put_Line(File => file, Item => "D = A");                 -- D = A = argument
+                                                               
+      Put_Line(File => file, Item => "@" & argument'Image);
+      Put_Line(File => file, Item => "D = D + A");
+      Put_Line(File => file, Item => "A = D");
 
-      Put_Line(File => file, Item => "@SP"); 
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "M = D");                -- M = RAM[A] = RAM[top of stack] = D = argument
+      
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
 
-      Close(file);
+      Close(file);   
    end push_argument;
 
    procedure push_this (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@" & argument'Image);
+      Put_Line(File => file, Item => "D = A");       
+                                                               
+      Put_Line(File => file, Item => "@THIS");
+      Put_Line(File => file, Item => "A = M + D");
+      Put_Line(File => file, Item => "D = M");
 
-      Put_Line(File => file, Item => "@SP"); 
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "A = M");               
+      Put_Line(File => file, Item => "M = D");
 
-      Close(file);
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
+
+      Close(file);    
    end push_this;
    
    procedure push_that (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@" & argument'Image);
+      Put_Line(File => file, Item => "D = A");       
+                                                               
+      Put_Line(File => file, Item => "@THAT");
+      Put_Line(File => file, Item => "A = M + D");
+      Put_Line(File => file, Item => "D = M");
 
-      Put_Line(File => file, Item => "@SP"); 
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "A = M");               
+      Put_Line(File => file, Item => "M = D");
 
-      Close(file);      
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
+
+      Close(file);   
    end push_that;
 
    procedure push_temp (argument: Integer) is
    begin 
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@TEMP");
+      Put_Line(File => file, Item => "D = A");
+      Put_Line(File => file, Item => "@" & argument'Image);
+      Put_Line(File => file, Item => "A = A + D");
+      Put_Line(File => file, Item => "D = M");                
 
-      Put_Line(File => file, Item => "@SP"); 
-
-      Close(file);      
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "A = M");                -- A = RAM[A] = top of stack
+      Put_Line(File => file, Item => "M = D");                -- M = RAM[A] = RAM[top of stack] = D = argument
+      
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
+      Close(file);
    end push_temp;
 
    procedure push_static (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      Put_Line(File => file, Item => "@" & file_name & '.' & argument'Image); -- A = argument
+      Put_Line(File => file, Item => "D = M");                 -- D = A = argument
 
-      Put_Line(File => file, Item => "@SP"); 
-
-      Close(file);      
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "A = M");                -- A = RAM[A] = top of stack
+      Put_Line(File => file, Item => "M = D");                -- M = RAM[A] = RAM[top of stack] = D = argument
+      
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
+      Close(file);   
    end push_static;
 
    procedure push_ptr (argument: Integer) is 
    begin 
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
+      
+      case argument is
+      when 0 =>
+         Put_Line(File => file, Item => "@THIS"); 
+      when 1 =>
+         Put_Line(File => file, Item => "@THAT");
+      when others =>
+         null;
+      end case;
+     
+      Put_Line(File => file, Item => "D = M");                
 
-      Put_Line(File => file, Item => "@SP"); 
+      Put_Line(File => file, Item => "@SP");                   
+      Put_Line(File => file, Item => "A = M");               
+      Put_Line(File => file, Item => "M = D");                
+      
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
 
-      Close(file);         
+      Close(file);                 
    end push_ptr;
    
    procedure push_const (argument: Integer) is
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
       
-      Put_Line(File => file, Item => "@SP");
-      Put_Line(File => file, Item => "A = M");
-      Put_Line(File => file, Item => "@" & argument'Image);
-      Put_Line(File => file, Item => "D = A");
-      Put_Line(File => file, Item => "@SP");
-      Put_Line(File => file, Item => "A = M");
-      Put_Line(File => file, Item => "M = D");
+      Put_Line(File => file, Item => "@" & argument'Image); -- A = argument
+      Put_Line(File => file, Item => "D = A");                 -- D = A = argument
+
+      Put_Line(File => file, Item => "@SP");                    -- A = SP = 0
+      Put_Line(File => file, Item => "A = M");                -- A = RAM[A] = top of stack
+      Put_Line(File => file, Item => "M = D");                -- M = RAM[A] = RAM[
       
-      Put_Line(File => file, Item => "@SP");
-      Put_Line(File => file, Item => "M = M + 1");
+      Put_Line(File => file, Item => "@SP");                   -- A = 0
+      Put_Line(File => file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
       Close(file);
    end push_const;
    
@@ -248,19 +317,22 @@ package body CodeWriter is
       Close(file);         
    end pop_temp;
 
-   procedure pop_static (file_name: String,  argument: Integer) is -- file_name = "name" from "name.vm"
+   procedure pop_static (argument: Integer) is -- file_name = "name" from "name.vm"
+      str_class_name : String :=  file_name & '.' & argument'Image; 
+      -- RANGE OF STATIC BLOCK: [16 - 255]
+      -- can also calculate the offset with a loop incrementing 'argument' times the value 16
    begin
       Open(File => file, Mode => Out_File, Name => "out_f.asm");
-      --  declare
-      --     item_val : String := file_name & '.' & argument'Image;
-      --  begin
-      --  
-      --  end;
+ 
+      Put_Line(File => file, Item => "@SP");
+      Put_Line(File => file, Item => "A = M - 1"); 
+      Put_Line(File => file, Item => "D = M");
 
-      Put_Line(File => file, Item => "@" & file_name & '.' & argument'Image); 
-               Put_Line(File => file, Item => "@SP");
-               Put_Line(File => file, Item => "M = M - 1"); 
-
+      Put_Line(File => file, Item => "@" & str_class_name);
+      Put_Line(File => file, Item => "M = D");
+      
+      Put_Line(File => file, Item => "@SP");
+      Put_Line(File => file, Item => "M = M - 1");
       Close(file);         
    end pop_static;
 
@@ -272,24 +344,19 @@ package body CodeWriter is
       Put_Line(File => file, Item => "A = M - 1");           -- A = RAM[0] - 1
       Put_Line(File => file, Item => "D = M");                --  D = RAM[A] = VALUE OF *SP - 1
       case argument is
-             when 0 =>
+           when 0 =>
                Put_Line(File => file, Item => "@THIS");        -- A = SP = 0
-               Put_Line(File => file, Item => "A = D");        -- A = RAM[0] - 1
-             when 1 =>
+         when 1 =>
                Put_Line(File => file, Item => "@THAT");      -- A = SP = 0
-               Put_Line(File => file, Item => "A = D");        -- A = RAM[0] - 1
          when others =>
             null;
-      end case;
+      end case;               
+      Put_Line(File => file, Item => "A = D");        -- A = RAM[0] - 1
+
       Put_Line(File => file, Item => "@SP");                   -- A = SP = 0
       Put_Line(File => file, Item => "M = M - 1");          -- RAM[0] = RAM[0] - 1 = next available place in memory
  
       Close(file);         
    end pop_ptr;
- 
-   procedure pop_const (argument: Integer) is
-   begin
-      null;
-   end pop_const;
 
 end CodeWriter;

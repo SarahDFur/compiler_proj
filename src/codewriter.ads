@@ -1,4 +1,6 @@
 package CodeWriter is
+   
+   
    -- parser -> sends to appropriate write algorithm
    -- writes to file HACK code for "add x y"
    --  procedure write_add (arg1: Integer, arg2: Integer);
@@ -27,10 +29,8 @@ package CodeWriter is
    -- GROUP 2:
    procedure pop_temp (argument: Integer);
    -- GROUP 3;
-   procedure pop_static (file_name: String, argument: Integer);
+   procedure pop_static (argument: Integer);
    -- GROUP 4:
    procedure pop_ptr (argument: Integer);
-   -- GROUP 5:
-   procedure pop_const (argument: Integer);
 
 end CodeWriter;
