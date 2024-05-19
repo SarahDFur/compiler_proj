@@ -5,6 +5,7 @@ package CodeWriter is
    -- writes to file HACK code for "add x y"
    --  procedure write_add (arg1: Integer, arg2: Integer);
    
+   -- ARITHMATIC & LOGIC FUNCTIONS: --
    
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
