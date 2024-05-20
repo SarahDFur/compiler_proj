@@ -118,25 +118,27 @@ package body Parser is
       i : Integer := 0;
       Line: String := "";
       f_in : File_Type;
-      f_in_name : String := "";
+      instructions: instruction_record;
    begin
-      Open(File => file, Mode => In_File, Name => f_name); -- the input file with the .vm extenssion
-      i := Utils.find_char_index(f_name, '.');
-      f_in_name := f_name(1..i-1) & ".asm";
+      Open(File => f_in, Mode => In_File, Name => if_name); -- the input file with the .vm extenssion
 
-      Create(File => f_in, Mode => Out_File,
-                         Name => Current_Directory & f_in_name); -- creates .asm file with the same name as the .vm file
-      Open(File => f_in, Mode => Out_FIle, Name => f_in_name);
-      -- Loop to read lines until the end of file is reached
-      loop
-         Get_Line (File => file, Item => Line);
-         exit when End_Of_File (File);  -- Exit loop on end of file
-                                        -- Process the line here (e.g., print it)
-         Put_Line (Line);
+      CodeWriter.init_f(if_name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
+
+      while not End_Of_File(f_in) loop
+         Get_Line (File => f_in, Item => Line);
+         instructions := parse_Instruction(Line);
+         if instructions.Op = "pop" or instructions.Op = "push" then
+            switch_stack_ops(instructions.Op, instrucions.label, instructions.arg);
+         else
+            switch_arith_ops(instructions.Op, instrucions.label, instructions.arg);
+         end if;
+         Line := "";
       end loop;
 
-      Close(file);
+      CodeWriter.init_f(""); -- make the current file name an empty string once more
+      Close(f_in);
    end read_file;
+
    function  parse_Instruction (Line:String) return instruction_record is
    -- 1. separate the instruction by finding the index of ' '
    -- 2. delete that part of the string
@@ -144,14 +146,7 @@ package body Parser is
    -- 4. then use that last one for what is needed
    -- (usually changed to number, but need to check based on all options!)
       ins: instruction_record;
-      i : Integer := 0;
-      start_i: Integer := 0;
-      end_i : Integer := 0;
    begin
-      for i in Line'Length loop
-
-         null;
-      end loop;
 
       return ins;
    end parse_Instruction;
