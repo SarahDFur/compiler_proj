@@ -19,7 +19,7 @@ package CodeWriter is
    procedure write_or ;
      -- writes to file HACK code for "not x"
    procedure write_not ;
-   s
+   
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
    procedure push_local (argument: Integer);

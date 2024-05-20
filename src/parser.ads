@@ -1,10 +1,17 @@
 package Parser is
 
+   type instruction_record is record
+      op: String (1.. 30);
+      label : String (1.. 30);
+      arg: Integer;
+   end record;
+   
+   procedure init_parser(full_ofname: String); -- initializes the parser - CALLED FROM MAIN
+   procedure read_file(if_name: String);
    -- Will have a switch, in which all instructions 
    -- Instruction Line will be sent to the appropriate write_to_file functions
-   procedure parse_Instruction (i_fname: String, Line : String);
-   procedure switch_stack_ops (op: String, label : String, argument: String);
-   procedure switch_arith_ops (op: String, label: String, argument: String);
-   procedure switch_logic_ops (op: String, label: String, argument: String);
+   function parse_Instruction (i_fname: String; Line : String) return instruction_record;
+   procedure switch_stack_ops (op: String; label : String; argument: String);
+   procedure switch_arith_ops (op: String; label: String; argument: String);
 
 end Parser;

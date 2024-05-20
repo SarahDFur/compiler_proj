@@ -1,12 +1,13 @@
 with Ada.Text_IO; use Ada.Text_IO;
-with arith_logic; use arith_logic;
+with Parser; use Parser;
+with Ada.DIrectories; use Ada.Directories;
 
 procedure Main is
    file: File_Type;
+
 begin
    Ada.Text_IO.Create(File => file, Mode => Ada.Text_IO.Out_File,
-                         Name => "C:\Users\daaty\Desktop\school\semester b\fundamentals\compiler_proj\\out_f.asm");
-
-   --  Insert code here.
+                         Name => Current_Directory & "out_f.asm");
+   Parser.init_parser("out_f.asm");
    null;
 end Main;
