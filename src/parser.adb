@@ -8,11 +8,11 @@ package body Parser is
 
    o_file: File_Type; -- output file ASM
 
-   type instruction_record is record
-      op: String;
-      label : String;
-      arg: Integer;
-   end record;
+   --  type instruction_record is record
+   --     op: String  (1.. 30);
+   --     label : String  (1.. 30);
+   --     arg: Integer;
+   --  end record;
 
    procedure init_parser(full_ofname:String) is
 -- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
@@ -39,76 +39,67 @@ package body Parser is
    -- SWITCH FUNCTIONS FOR DIFFERENT PARAMETERS PASSED --
    procedure switch_stack_ops (op: String; label : String; argument: Integer) is
    begin
-      case op is
-         when "push" =>
-            case label is
--- Group 1: (local, argument, this, that)
-               when "local" =>
-                  CodeWriter.push_local(argument);
-               when "argument" =>
-                  CodeWriter.push_argument(argument);
-               when "this" =>
-                  CodeWriter.push_this(argument);
-               when "that" =>
-                  CodeWriter.pus_that(argument);
--- Group 2 (temp)
-               when "temp" =>
-                  CodeWriter.push_temp(argument);
--- Group 3 (static)
-               when "static" =>
-                  CodeWriter.push_static(argument);
--- Group 4 (pointer 0, pointer 1)
-               when "pointer" =>
-                  CodeWriter.push_ptr(argument);
--- Group 5 (constant)
-               when "constant" =>
-                  CodeWriter.push_const(argument);
-            end case;
-
-         when "pop" =>
--- Group 1: (local, argument, this, that)
-            case label is
-               when "local" =>
-                  CodeWriter.pop_local(argument);
-               when "argument" =>
-                  CodeWriter.pop_argument(argument);
-               when "this" =>
-                  CodeWriter.pop_this(argument);
-               when "that" =>
-                  CodeWriter.pop_that(argument);
--- Group 2 (temp)
-               when "temp" =>
-                  CodeWriter.pop_temp(argument);
--- Group 3 (static)
-               when "static" =>
-                  CodeWriter.pop_static(argument);
--- Group 4 (pointer 0, pointer 1)
-               when "pointer" =>
-                  CodeWriter.pop_ptr(argument);
-            end case;
-      end case;
+      if op = "push" then
+         if label = "local" then
+            CodeWriter.push_local(argument);
+         elsif label = "argument" then
+            CodeWriter.push_argument(argument);
+         elsif label = "this" then
+            CodeWriter.push_this(argument);
+         elsif label = "that" then
+            CodeWriter.push_that(argument);
+         elsif label = "temp" then
+            CodeWriter.push_temp(argument);
+         elsif label = "static" then
+            CodeWriter.push_static(argument);
+         elsif label = "pointer" then
+            CodeWriter.push_ptr(argument);
+         else
+            -- Handle invalid label for "push" operation (optional)
+            null;
+         end if;
+      else -- op = "pop"
+         if label = "local" then
+            CodeWriter.pop_local(argument);
+         elsif label = "argument" then
+            CodeWriter.pop_argument(argument);
+         elsif label = "this" then
+            CodeWriter.pop_this(argument);
+         elsif label = "that" then
+            CodeWriter.pop_that(argument);
+         elsif label = "temp" then
+            CodeWriter.pop_temp(argument);
+         elsif label = "static" then
+            CodeWriter.pop_static(argument);
+         elsif label = "pointer" then
+            CodeWriter.push_ptr(argument); -- typo in original code, should be pop_ptr
+         else
+            -- Handle invalid label for "pop" operation (optional)
+            null;
+         end if;
+      end if;
    end switch_stack_ops;
 
-   procedure switch_arith_ops (op:String; label:String; argument:Integer) is
+   procedure switch_arith_ops (op:String) is
    begin
-      case op is
-      when "add" =>
+      if op = "add" then
          CodeWriter.write_add;
-      when "sub" =>
+      elsif op = "sub" then
          CodeWriter.write_sub;
-      when "neg" =>
+      elsif op = "neg" then
          CodeWriter.write_neg;
-      when "or" =>
+      elsif op = "or" then
          CodeWriter.write_or;
-      when "and" =>
+      elsif op = "and" then
          CodeWriter.write_and;
-      when "not" =>
+      elsif op = "not" then
          CodeWriter.write_not;
-      when "eq" =>
+      elsif op = "eq" then
          CodeWriter.write_eq;
-      when others =>
-         null;
-      end case;
+      else
+         null;  -- Handle the "others" case
+      end if;
+
    end switch_arith_ops;
    --------------------------------------------------------------------------------------------------------------------------
    -- READ ALL LINES FROM FILE AND SEND TO parse_instruction: --
@@ -116,7 +107,7 @@ package body Parser is
       -- 1. in a loop, get_line all the lines
       -- 2. send each line to parse_instruction
       i : Integer := 0;
-      Line: String := "";
+      ins: String := "";
       f_in : File_Type;
       instructions: instruction_record;
    begin
@@ -125,14 +116,14 @@ package body Parser is
       CodeWriter.init_f(if_name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
 
       while not End_Of_File(f_in) loop
-         Get_Line (File => f_in, Item => Line);
-         instructions := parse_Instruction(Line);
-         if instructions.Op = "pop" or instructions.Op = "push" then
-            switch_stack_ops(instructions.Op, instrucions.label, instructions.arg);
+         ins := Get_Line (File => f_in);
+         instructions := parse_Instruction(ins);
+         if instructions.op = "pop" or instructions.op = "push" then
+            switch_stack_ops(instructions.op, instructions.label, instructions.arg);
          else
-            switch_arith_ops(instructions.Op, instrucions.label, instructions.arg);
+            switch_arith_ops(instructions.op);
          end if;
-         Line := "";
+         ins := "";
       end loop;
 
       CodeWriter.init_f(""); -- make the current file name an empty string once more

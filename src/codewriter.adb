@@ -98,6 +98,11 @@ package body CodeWriter is
       --  Close(file);
    end write_not;
 
+   procedure write_eq is
+   begin
+      
+   end write_eq;
+   
       -- PUSH WRITE FUNCTIONS: --
    procedure push_local (argument: Integer) is
    begin

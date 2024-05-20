@@ -20,6 +20,8 @@ package CodeWriter is
      -- writes to file HACK code for "not x"
    procedure write_not ;
    
+   procedure write_eq;
+   
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
    procedure push_local (argument: Integer);

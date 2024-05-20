@@ -10,8 +10,8 @@ package Parser is
    procedure read_file(if_name: String);
    -- Will have a switch, in which all instructions 
    -- Instruction Line will be sent to the appropriate write_to_file functions
-   function parse_Instruction (i_fname: String; Line : String) return instruction_record;
-   procedure switch_stack_ops (op: String; label : String; argument: String);
-   procedure switch_arith_ops (op: String; label: String; argument: String);
+   function parse_Instruction (Line : String) return instruction_record;
+   procedure switch_stack_ops (op: String; label : String; argument: Integer);
+   procedure switch_arith_ops (op: String);
 
 end Parser;
