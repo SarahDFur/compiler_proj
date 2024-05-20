@@ -4,9 +4,22 @@ package CodeWriter is
    -- parser -> sends to appropriate write algorithm
    -- writes to file HACK code for "add x y"
    --  procedure write_add (arg1: Integer, arg2: Integer);
+   -- INIT FUNCTIONS / CONSTRUCTOR OF SORTS: --
+   procedure init_f(n:String); -- inits the file name for when we want to exeute pop/push static 
    
    -- ARITHMATIC & LOGIC FUNCTIONS: --
-   
+   procedure write_add;
+      -- writes to file HACK code for "sub x y"
+   procedure write_sub ;
+   -- writes to file HACK code for "-x"
+   procedure write_neg ;
+   -- writes to file HACK code for "x and y"
+   procedure write_and ;
+      -- writes to file HACK code for "x or y"
+   procedure write_or ;
+     -- writes to file HACK code for "not x"
+   procedure write_not ;
+   s
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
    procedure push_local (argument: Integer);
