@@ -1,7 +1,10 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Characters.Conversions;
 
 package body Utils is
+   
+   --  type String_Array is array (Positive range <>) of Unbounded_String;
 
    -- type conversion function : String -> Integer
    function string_to_int (str: String) return Integer is
@@ -27,13 +30,24 @@ package body Utils is
       return -1;
    end find_char_index;
 
-   --  function delete_substring (str: String, sub: String) return String is
-   --     i_start : Integer := 0;
-   --     i_end : Integer := 0;
-   --  begin
-   --     i_start := find_char_index(str, sub(1));
-   --     i_end := find_char_index(str, sub(sub'Length - 1));
-   --     return str(0..i_start-1) & str(i_end..str'Length - 1);
-   --  end delete_substring;
+   function split_string (str: String) return String_Array is
+      Arr : String_Array := (1..300000=> To_Unbounded_String("")); --not size cost
+      conter: Integer:=1;
+      Temp : Unbounded_String := To_Unbounded_String(" ");
+      S1 : String:=" ";
+   begin 
+      --  S1:= To_String(str);
+      for I in str'Range loop
+         if str(I) = ' ' then
+            Arr(conter):=Temp;
+            conter:=conter+1;
+            Temp := To_Unbounded_String(" ");
+         else
+            Append(Temp, str(I));
+         end if;
+      end loop;
+      return Arr;
+   end split_string;
+
    
 end Utils;

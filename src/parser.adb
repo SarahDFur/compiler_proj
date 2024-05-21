@@ -3,38 +3,57 @@ with CodeWriter; use CodeWriter;
 with Ada.Directories; use Ada.Directories;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Utils; use Utils;
+with Ada.Characters.Conversions;
+
 
 package body Parser is
 
    o_file: File_Type; -- output file ASM
-
-   --  type instruction_record is record
-   --     op: String  (1.. 30);
-   --     label : String  (1.. 30);
-   --     arg: Integer;
-   --  end record;
+   --  type String_Array is array (Positive range <>) of Unbounded_String;
 
    procedure init_parser(full_ofname:String) is
 -- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
-      --  fnames_arr: array(0..4) of String;
+      use Ada.Characters.Conversions;
+      S1 : String:=" ";
+
+      S : Unbounded_String := To_Unbounded_String("");
+      Pattern : constant String      := "*.vm";
+      Filter  : constant Filter_Type :=
+        (Ordinary_File => True, others => False);   --  Files only.
+      Search : Search_Type;
+      Dir_Entry : Directory_Entry_Type;
+      Temp : Unbounded_String := To_Unbounded_String(" ");
+      Arr : String_Array := (1..300000=> To_Unbounded_String("")); --not size cost
+      conter: Integer:=1;
+
    begin
       Open(File => o_file, Mode => Out_File, Name => full_ofname);
-      --  fnames_arr := Utils.current_dir_filenames;
-      -- loop that for each file in the current dir (that is vm)
-      -- send the file name to the read_file procedure
+
+      Start_Search (Search, Current_Directory, Pattern, Filter); -- start searching
+      while More_Entries (Search) loop
+         Get_Next_Entry (Search, Dir_Entry);
+         Append(S, Simple_Name(Dir_Entry));
+         Append(S, " ");
+      end loop;
+      End_Search (Search);
+      S1:= To_String(S);
+      for I in S1'Range loop
+         if S1(I) = ' ' then
+            arr(conter):=Temp;
+            conter:=conter+1;
+            Temp := To_Unbounded_String(" ");
+         else
+            Append(Temp, S1(I));
+         end if;
+      end loop;
+
+      -- loop over file names array
+      for index in Arr'Range loop
+         read_file(To_String(Arr(index)));
+      end loop;
 
       Close(o_file);
    end init_parser;
-
-   procedure init_file_traversal is -- like list_directories from project 0
-   begin
-      -- 1. loop over all files in current directory
-      -- 2. if the file has extenssion of ".vm":
-      -- 2.1. extract name of file
-      -- 2.2: create and open a corresponding .asm file (with the same file name as the .vm one)
-      -- 3. ...
-      null;
-   end init_file_traversal;
 
    -- SWITCH FUNCTIONS FOR DIFFERENT PARAMETERS PASSED --
    procedure switch_stack_ops (op: String; label : String; argument: Integer) is
@@ -96,6 +115,10 @@ package body Parser is
          CodeWriter.write_not;
       elsif op = "eq" then
          CodeWriter.write_eq;
+      elsif op = "lt" then
+         CodeWriter.write_lt;
+      elsif op = "gt" then
+         CodeWriter.write_gt;
       else
          null;  -- Handle the "others" case
       end if;
@@ -110,10 +133,11 @@ package body Parser is
       ins: String := "";
       f_in : File_Type;
       instructions: instruction_record;
+      name: String := if_name(if_name'First..find_char_index(if_name, '.')  - 1);
    begin
       Open(File => f_in, Mode => In_File, Name => if_name); -- the input file with the .vm extenssion
 
-      CodeWriter.init_f(if_name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
+      CodeWriter.init_f(name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
 
       while not End_Of_File(f_in) loop
          ins := Get_Line (File => f_in);
@@ -137,7 +161,16 @@ package body Parser is
    -- 4. then use that last one for what is needed
    -- (usually changed to number, but need to check based on all options!)
       ins: instruction_record;
+      arr: Utils.String_Array := (1..300000=> To_Unbounded_String(""));
    begin
+      arr := Utils.split_string(Line);
+      ins.op := To_String(arr(1));
+      if arr(2) /= "" then
+         ins.label := To_String(arr(2));
+         if arr(3) /= "" then
+            ins.arg := Utils.string_to_int(To_String(arr(3)));
+         end if;
+      end if;
 
       return ins;
    end parse_Instruction;
