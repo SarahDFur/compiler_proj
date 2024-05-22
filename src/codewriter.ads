@@ -1,11 +1,12 @@
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO; use Ada.Text_IO;
 package CodeWriter is
-   
    
    -- parser -> sends to appropriate write algorithm
    -- writes to file HACK code for "add x y"
    --  procedure write_add (arg1: Integer, arg2: Integer);
    -- INIT FUNCTIONS / CONSTRUCTOR OF SORTS: --
-   procedure init_f(n:String); -- inits the file name for when we want to exeute pop/push static 
+   procedure init_f(n: Unbounded_String); -- inits the file name for when we want to exeute pop/push static 
    
    -- ARITHMATIC & LOGIC FUNCTIONS: --
    procedure write_add;
@@ -21,6 +22,10 @@ package CodeWriter is
    procedure write_not ;
    
    procedure write_eq;
+   
+   procedure write_lt;
+   
+   procedure write_gt;
    
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:

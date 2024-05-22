@@ -23,7 +23,8 @@ package body Utils is
       --  Put_Line(Search_str);
       for Index in Search_str'Range loop
             if Search_str(Index) = ch then
-                Put_Line("char at index:" & Index'Image);
+                Put_Line("char at index:" & Index'Image );
+                Put_Line(Search_str(Search_str'First .. Index-1));
                 return Index;
             end if;
       end loop;
@@ -32,18 +33,23 @@ package body Utils is
 
    function split_string (str: String) return String_Array is
       Arr : String_Array := (1..300000=> To_Unbounded_String("")); --not size cost
-      conter: Integer:=1;
-      Temp : Unbounded_String := To_Unbounded_String(" ");
-      S1 : String:=" ";
+      counter : Natural := 1; -- For indexing the array elements
+      Temp : Unbounded_String := To_Unbounded_String("");
+      S : Unbounded_String:=To_Unbounded_String(str);
    begin 
-      --  S1:= To_String(str);
-      for I in str'Range loop
-         if str(I) = ' ' then
-            Arr(conter):=Temp;
-            conter:=conter+1;
-            Temp := To_Unbounded_String(" ");
+      for I in 1 .. Natural(Length(S)) loop
+         if Element(S, I) = ' ' then
+            -- Debug Print: Print the content of Temp
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Temp));
+            Arr(counter) := Temp;
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
+            counter := counter + 1;
+            Temp := To_Unbounded_String("");
          else
-            Append(Temp, str(I));
+            Append(Temp, Element(S, I));
+         end if;
+         if To_String(temp) /= "" then
+            Arr(counter) := Temp;
          end if;
       end loop;
       return Arr;

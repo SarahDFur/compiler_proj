@@ -4,54 +4,59 @@ with Ada.Directories; use Ada.Directories;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Utils; use Utils;
 with Ada.Characters.Conversions;
-
+use Ada.Characters.Conversions;
 
 package body Parser is
 
-   o_file: File_Type; -- output file ASM
+   --  o_file: File_Type; -- output file ASM
    --  type String_Array is array (Positive range <>) of Unbounded_String;
 
    procedure init_parser(full_ofname:String) is
 -- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
-      use Ada.Characters.Conversions;
-      S1 : String:=" ";
+    S : Unbounded_String := To_Unbounded_String("");
+    Pattern : constant String := "*.vm";
+    Filter  : constant Filter_Type := (Ordinary_File => True, others => False); -- Files only.
+    Search : Search_Type;
+    Dir_Entry : Directory_Entry_Type;
+    Temp : Unbounded_String := To_Unbounded_String("");
+    type String_Array is array (Positive range <>) of Unbounded_String;
+    Arr : String_Array (1 .. 300000);-- Initialize all elements in the array
+    counter : Natural := 1; -- For indexing the array elements
+begin
+    --Put_Line(Current_Directory); -- Print the current directory
+      Open(File => o_file, Mode => Out_File, Name => "out_f.asm");
 
-      S : Unbounded_String := To_Unbounded_String("");
-      Pattern : constant String      := "*.vm";
-      Filter  : constant Filter_Type :=
-        (Ordinary_File => True, others => False);   --  Files only.
-      Search : Search_Type;
-      Dir_Entry : Directory_Entry_Type;
-      Temp : Unbounded_String := To_Unbounded_String(" ");
-      Arr : String_Array := (1..300000=> To_Unbounded_String("")); --not size cost
-      conter: Integer:=1;
-
-   begin
-      Open(File => o_file, Mode => Out_File, Name => full_ofname);
-
-      Start_Search (Search, Current_Directory, Pattern, Filter); -- start searching
-      while More_Entries (Search) loop
-         Get_Next_Entry (Search, Dir_Entry);
+      Start_Search(Search, Current_Directory, Pattern, Filter); -- Start searching
+      while More_Entries(Search) loop
+         Get_Next_Entry(Search, Dir_Entry);
+         --Ada.Text_IO.Put_Line(Simple_Name(Dir_Entry));
          Append(S, Simple_Name(Dir_Entry));
          Append(S, " ");
       end loop;
-      End_Search (Search);
-      S1:= To_String(S);
-      for I in S1'Range loop
-         if S1(I) = ' ' then
-            arr(conter):=Temp;
-            conter:=conter+1;
-            Temp := To_Unbounded_String(" ");
+
+      End_Search(Search);
+
+      -- Debug Print: Print the content of S
+      --  Ada.Text_IO.Put_Line("Content of S: " & To_String(S));
+
+      -- Extracting strings and adding them to the array
+      for I in 1 .. Natural(Length(S)) loop
+         if Element(S, I) = ' ' then
+            -- Debug Print: Print the content of Temp
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Temp));
+            Arr(counter) := Temp;
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
+            counter := counter + 1;
+            Temp := To_Unbounded_String("");
          else
-            Append(Temp, S1(I));
+            Append(Temp, Element(S, I));
          end if;
       end loop;
 
-      -- loop over file names array
-      for index in Arr'Range loop
-         read_file(To_String(Arr(index)));
+      -- Debug Print: Print the content of Arr
+      for I in 1 .. counter - 1 loop
+         read_file(To_String(Arr(I)));
       end loop;
-
       Close(o_file);
    end init_parser;
 
@@ -73,6 +78,8 @@ package body Parser is
             CodeWriter.push_static(argument);
          elsif label = "pointer" then
             CodeWriter.push_ptr(argument);
+         elsif label = "constant" then
+            CodeWriter.push_const(argument);
          else
             -- Handle invalid label for "push" operation (optional)
             null;
@@ -130,27 +137,29 @@ package body Parser is
       -- 1. in a loop, get_line all the lines
       -- 2. send each line to parse_instruction
       i : Integer := 0;
-      ins: String := "";
+      ins: Unbounded_String;
       f_in : File_Type;
       instructions: instruction_record;
-      name: String := if_name(if_name'First..find_char_index(if_name, '.')  - 1);
+      name: Unbounded_String := To_Unbounded_String(if_name(if_name'First..find_char_index(if_name, '.')  - 1));
    begin
+      Put_Line(if_name);
       Open(File => f_in, Mode => In_File, Name => if_name); -- the input file with the .vm extenssion
 
       CodeWriter.init_f(name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
 
       while not End_Of_File(f_in) loop
-         ins := Get_Line (File => f_in);
-         instructions := parse_Instruction(ins);
-         if instructions.op = "pop" or instructions.op = "push" then
-            switch_stack_ops(instructions.op, instructions.label, instructions.arg);
+         ins := To_Unbounded_String(Get_Line (File => f_in));
+         --  Put_Line(To_String(ins));
+         instructions := parse_Instruction(To_String(ins));
+         if To_String(instructions.op) = "pop" or To_String(instructions.op) = "push" then
+            switch_stack_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
          else
-            switch_arith_ops(instructions.op);
+            switch_arith_ops(To_String(instructions.op));
          end if;
-         ins := "";
+         ins := To_Unbounded_String("");
       end loop;
 
-      CodeWriter.init_f(""); -- make the current file name an empty string once more
+      CodeWriter.init_f(To_Unbounded_String("")); -- make the current file name an empty string once more
       Close(f_in);
    end read_file;
 
@@ -164,14 +173,25 @@ package body Parser is
       arr: Utils.String_Array := (1..300000=> To_Unbounded_String(""));
    begin
       arr := Utils.split_string(Line);
-      ins.op := To_String(arr(1));
-      if arr(2) /= "" then
-         ins.label := To_String(arr(2));
-         if arr(3) /= "" then
-            ins.arg := Utils.string_to_int(To_String(arr(3)));
+      if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq" and arr(1) /= "gt"
+        and arr(1) /= "lt" and arr(1) /= "and" and arr(1) /= "or" and arr(1) /= "not" and arr(1) /= "neg" then
+         ins.op := To_Unbounded_String("//");
+         ins. label := To_Unbounded_String("");
+         ins.arg := 0;
+         --  Put_Line(File => o_file, item => To_String(arr(1)));
+      else
+         ins.op := (arr(1));
+         --  Put_Line(File => o_file, item => To_String(arr(1)));
+
+         if arr(2) /= "" then
+            ins.label := (arr(2));
+            --  Put_Line(File => o_file, item => To_String(arr(2)));
+            if arr(3) /= "" then
+               ins.arg := Utils.string_to_int(To_String(arr(3)));
+               --  Put_Line(File => o_file, item => To_String(arr(3)));
+            end if;
          end if;
       end if;
-
       return ins;
    end parse_Instruction;
 

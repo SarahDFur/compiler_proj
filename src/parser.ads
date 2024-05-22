@@ -1,9 +1,11 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO; use Ada.Text_IO;
 package Parser is
+   o_file: File_Type; -- output file ASM
 
    type instruction_record is record
-      op: String (1.. 30);
-      label : String (1.. 30);
+      op: Unbounded_String;
+      label : Unbounded_String;
       arg: Integer;
    end record;
    type String_Array is array (Positive range <>) of Unbounded_String;
