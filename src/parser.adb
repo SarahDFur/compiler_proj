@@ -98,7 +98,7 @@ begin
          elsif label = "static" then
             CodeWriter.pop_static(argument);
          elsif label = "pointer" then
-            CodeWriter.push_ptr(argument); -- typo in original code, should be pop_ptr
+            CodeWriter.pop_ptr(argument); -- typo in original code, should be pop_ptr
          else
             -- Handle invalid label for "pop" operation (optional)
             null;
@@ -126,6 +126,8 @@ begin
          CodeWriter.write_lt;
       elsif op = "gt" then
          CodeWriter.write_gt;
+      elsif op = "#lt" then
+         CodeWriter.write_hash_lt;
       else
          null;  -- Handle the "others" case
       end if;
@@ -174,7 +176,7 @@ begin
    begin
       arr := Utils.split_string(Line);
       if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq" and arr(1) /= "gt"
-        and arr(1) /= "lt" and arr(1) /= "and" and arr(1) /= "or" and arr(1) /= "not" and arr(1) /= "neg" then
+        and arr(1) /= "lt" and arr(1) /= "#lt" and arr(1) /= "and" and arr(1) /= "or" and arr(1) /= "not" and arr(1) /= "neg" then
          ins.op := To_Unbounded_String("//");
          ins. label := To_Unbounded_String("");
          ins.arg := 0;

@@ -27,6 +27,7 @@ package CodeWriter is
    
    procedure write_gt;
    
+   procedure write_hash_lt;
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
    procedure push_local (argument: Integer);
