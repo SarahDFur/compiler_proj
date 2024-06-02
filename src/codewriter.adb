@@ -314,17 +314,17 @@ package body CodeWriter is
    begin
       Put_Line (File => Parser.o_file, Item => "//PUSH LCL");
       Put_Line(File => Parser.o_file, Item => "@" & argument'Image (2 .. argument'Image'Length));
-      Put_Line(File => Parser.o_file,Item => "D = A");                 -- D = A = argument
+      Put_Line(File => Parser.o_file,Item => "D=A");                 -- D = A = argument
 
       Put_Line(File => Parser.o_file, Item => "@LCL");               -- A = argument segment
       --  Put_Line(File => Parser.o_file,Item => "D = A");                 -- D = A = argument
 
-      Put_Line (File => Parser.o_file, Item => "A = M + D");
-      Put_Line (File => Parser.o_file, Item => "D = M");
+      Put_Line (File => Parser.o_file, Item => "A= M+D");
+      Put_Line (File => Parser.o_file, Item => "D=M");
 
       Put_Line(File => Parser.o_file,Item => "@SP");                    -- A = SP = 0
-      Put_Line (File => Parser.o_file, Item => "A = M");
-      Put_Line (File => Parser.o_file, Item => "M = D");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "M= D");
 
       Put_Line(File => Parser.o_file, Item => "@SP");                   -- A = 0
       Put_Line(File => Parser.o_file, Item => "M = M + 1");         --  RAM[A] = RAM[A] + 1 = next free place
@@ -403,7 +403,7 @@ package body CodeWriter is
       --  Open(File => file, Mode => Out_File, Name => "out_f.asm");
 
       Put_Line (File => Parser.o_file, Item => "//PUSH TEMP");
-      Put_Line (File => Parser.o_file, Item => "@TEMP");
+      Put_Line (File => Parser.o_file, Item => "@5");
       Put_Line (File => Parser.o_file, Item => "D = A");
 
       Put_Line(File => Parser.o_file, Item => "@" & argument'Image (2 .. argument'Image'Length));
@@ -606,7 +606,7 @@ package body CodeWriter is
       declare
          val : Integer := 5 + argument;
       begin
-         Put_Line (File => Parser.o_file, Item => "@" & val'Image(2 .. val'Image'Length));
+         Put_Line (File => Parser.o_file, Item => "@" & val'Image (2 .. val'Image'Length));
       end;
       Put_Line(File => Parser.o_file,Item => "M = D");                -- RAM[ RAM[TEMP] + argument ] = the value in TEMP + offset
 
