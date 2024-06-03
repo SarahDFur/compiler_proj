@@ -78,6 +78,7 @@ package body Parser is
       Close(o_file);
    end init_parser;
 
+
    -- SWITCH FUNCTIONS FOR DIFFERENT PARAMETERS PASSED --
    procedure switch_stack_ops (op: String; label : String; argument: Integer) is
    begin
@@ -116,7 +117,7 @@ package body Parser is
          elsif label = "static" then
             CodeWriter.pop_static(argument);
          elsif label = "pointer" then
-            CodeWriter.pop_ptr(argument); -- typo in original code, should be pop_ptr
+            CodeWriter.push_ptr(argument); -- typo in original code, should be pop_ptr
          else
             -- Handle invalid label for "pop" operation (optional)
             null;
@@ -144,14 +145,11 @@ package body Parser is
          CodeWriter.write_lt;
       elsif op = "gt" then
          CodeWriter.write_gt;
-      elsif op = "#lt" then
-         CodeWriter.write_hash_lt;
       else
          null;  -- Handle the "others" case
       end if;
 
    end switch_arith_ops;
-
    procedure switch_functions_ops (op: String; label : String; argument: Integer) is
    begin
        if op = "label" then
@@ -181,6 +179,7 @@ package body Parser is
    begin
       Put_Line(if_name);
       Open(File => f_in, Mode => In_File, Name => if_name); -- the input file with the .vm extenssion
+
       CodeWriter.init_f(name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
 
       while not End_Of_File(f_in) loop
@@ -205,8 +204,7 @@ package body Parser is
       CodeWriter.init_f(To_Unbounded_String("")); -- make the current file name an empty string once more
       Close(f_in);
    end read_file;
-
-   Function parse_Instruction(Line: String) return instruction_record is
+Function parse_Instruction(Line: String) return instruction_record is
    -- 1. separate the instruction by finding the index of ' '
    -- 2. delete that part of the string
    -- 3. send in loop again until there is we are returned -1
@@ -250,4 +248,4 @@ package body Parser is
       return ins;
    end parse_Instruction;
 
-  end Parser;
+end Parser;

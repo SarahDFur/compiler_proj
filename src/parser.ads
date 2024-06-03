@@ -18,6 +18,4 @@ package Parser is
    procedure switch_stack_ops (op: String; label : String; argument: Integer);
    procedure switch_arith_ops (op: String);
    procedure switch_functions_ops (op: String; label : String; argument: Integer);
-
 end Parser;
-
