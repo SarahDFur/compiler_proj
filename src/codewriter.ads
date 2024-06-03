@@ -66,7 +66,7 @@ package CodeWriter is
    
    --label-
    procedure write_label (label:String);
-procedure write_goto(label: String);
+   procedure write_goto(label: String);
    procedure write_if_goto (label:String) ;
    
    

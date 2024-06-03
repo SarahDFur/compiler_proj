@@ -18,6 +18,7 @@ package body CodeWriter is
    Output_Line       : Unbounded_String;
    Output_Line_false : Unbounded_String;
 
+   --Gets a name of the file that is being worked on now and defines in a variable
    procedure init_f (n : Unbounded_String) is
    begin
       --  file := f;
