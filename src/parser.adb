@@ -71,9 +71,9 @@ package body Parser is
       end if;
       -- Debug Print: Print the content of Arr
       for I in 1 .. counter - 1 loop
-          if Arr(I) /= "Sys.vm" then
+         if Arr(I) /= "Sys.vm" then
             read_file(To_String(Arr(I)));
-          end if;
+         end if;
       end loop;
       Close(o_file);
    end init_parser;
@@ -152,19 +152,19 @@ package body Parser is
    end switch_arith_ops;
    procedure switch_functions_ops (op: String; label : String; argument: Integer) is
    begin
-       if op = "label" then
+      if op = "label" then
          CodeWriter.write_label(label);
-       elsif op = "goto" then
+      elsif op = "goto" then
          CodeWriter.write_goto(label);
-       elsif op = "if-goto" then
+      elsif op = "if-goto" then
          CodeWriter.write_if_goto(label);
-       elsif op = "call" then
+      elsif op = "call" then
          CodeWriter.write_call(label,argument);
-       elsif op = "return" then
+      elsif op = "return" then
          CodeWriter.write_return;
-       elsif op = "function" then
+      elsif op = "function" then
          CodeWriter.write_function(label,argument);
-       end if;
+      end if;
    end switch_functions_ops;
    --------------------------------------------------------------------------------------------------------------------------
    -- READ ALL LINES FROM FILE AND SEND TO parse_instruction: --
@@ -194,7 +194,7 @@ package body Parser is
            To_String(instructions.op) = "call" or
            To_String(instructions.op) = "return"  or
            To_String(instructions.op) = "function" then
-             switch_functions_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
+            switch_functions_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
          else
             switch_arith_ops(To_String(instructions.op));
          end if;
@@ -204,12 +204,12 @@ package body Parser is
       CodeWriter.init_f(To_Unbounded_String("")); -- make the current file name an empty string once more
       Close(f_in);
    end read_file;
-Function parse_Instruction(Line: String) return instruction_record is
-   -- 1. separate the instruction by finding the index of ' '
-   -- 2. delete that part of the string
-   -- 3. send in loop again until there is we are returned -1
-   -- 4. then use that last one for what is needed
-   -- (usually changed to number, but need to check based on all options!)
+   Function parse_Instruction(Line: String) return instruction_record is
+      -- 1. separate the instruction by finding the index of ' '
+      -- 2. delete that part of the string
+      -- 3. send in loop again until there is we are returned -1
+      -- 4. then use that last one for what is needed
+      -- (usually changed to number, but need to check based on all options!)
       ins: instruction_record;
       arr: Utils.String_Array := (1..1000=> To_Unbounded_String(""));
    begin
@@ -223,29 +223,27 @@ Function parse_Instruction(Line: String) return instruction_record is
          ins.op := To_Unbounded_String("//");
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
-         Put_Line(item => "at instruction check: " & To_String(arr(1)));
-      else
-         if arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
-            ins.op := (arr(1));
-            ins.label := arr(2);
-            ins.arg := Utils.string_to_int(To_String(arr(3)));
-         end if;
+         --  Put_Line(item => "at instruction check: " & To_String(arr(1)));
+      elsif arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
+         ins.op := (arr(1));
+         ins.label := arr(2);
+         ins.arg := Utils.string_to_int(To_String(arr(3)));
          -- 2 WORDS:
-        elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
-            ins.op := (arr(1));
-            Put_Line(To_String(arr(1)));
-            ins.label := arr(2);
-            ins.arg := 0;
-         end if;
-
+      elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
+         ins.op := (arr(1));
+         Put_Line(To_String(arr(1)));
+         ins.label := arr(2);
+         ins.arg := 0;
          -- 1 WORD:
       elsif arr(1) = "return" then
          ins.op := arr(1);
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
-         end if;
-               end if;
-
+      else
+         ins.op := arr(1);
+         ins.label := To_Unbounded_String("");
+         ins.arg := 0;
+      end if;
       return ins;
    end parse_Instruction;
 
