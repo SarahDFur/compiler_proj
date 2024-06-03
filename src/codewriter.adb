@@ -811,7 +811,6 @@ package body CodeWriter is
 
    end write_return;
 
-
   procedure write_label (label:String) is
    begin
       Put_Line (File => Parser.o_file, Item => "//LABEL");

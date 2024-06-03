@@ -12,18 +12,21 @@ package body Parser is
    --  type String_Array is array (Positive range <>) of Unbounded_String;
 
    procedure init_parser(full_ofname:String) is
--- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
-    S : Unbounded_String := To_Unbounded_String("");
-    Pattern : constant String := "*.vm";
-    Filter  : constant Filter_Type := (Ordinary_File => True, others => False); -- Files only.
-    Search : Search_Type;
-    Dir_Entry : Directory_Entry_Type;
-    Temp : Unbounded_String := To_Unbounded_String("");
-    type String_Array is array (Positive range <>) of Unbounded_String;
-    Arr : String_Array (1 .. 300000);-- Initialize all elements in the array
-    counter : Natural := 1; -- For indexing the array elements
-begin
-    --Put_Line(Current_Directory); -- Print the current directory
+      -- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
+      S : Unbounded_String := To_Unbounded_String("");
+      Pattern : constant String := "*.vm";
+      Filter  : constant Filter_Type := (Ordinary_File => True, others => False); -- Files only.
+      Search : Search_Type;
+      Dir_Entry : Directory_Entry_Type;
+      Temp : Unbounded_String := To_Unbounded_String("");
+      type String_Array is array (Positive range <>) of Unbounded_String;
+      Arr : String_Array (1 .. 300000);-- Initialize all elements in the array
+      counter : Natural := 1; -- For indexing the array elements
+
+      -- index of sys file in arr (if it exists):
+      sys_index : Integer := -1;
+   begin
+      --Put_Line(Current_Directory); -- Print the current directory
       Open(File => o_file, Mode => Out_File, Name => "out_f.asm");
 
       Start_Search(Search, Current_Directory, Pattern, Filter); -- Start searching
@@ -53,9 +56,24 @@ begin
          end if;
       end loop;
 
+      -- check if sys file is in arr:
+      for I in 1 .. counter - 1 loop
+         if To_String(Arr(I)) = "Sys.vm" then
+            sys_index := I;
+         end if;
+      end loop;
+      if sys_index /= -1 then
+         Put_Line (File => o_file, Item => "@256");
+         Put_Line (File => o_file, Item => "D=A");
+         Put_Line (File => o_file, Item => "@SP");
+         Put_Line (File => o_file, Item => "M=D");
+         CodeWriter.write_call("Sys.init", 0);
+      end if;
       -- Debug Print: Print the content of Arr
       for I in 1 .. counter - 1 loop
-         read_file(To_String(Arr(I)));
+          if Arr(I) /= "Sys.vm" then
+            read_file(To_String(Arr(I)));
+          end if;
       end loop;
       Close(o_file);
    end init_parser;
@@ -105,7 +123,6 @@ begin
          end if;
       end if;
    end switch_stack_ops;
-
 
    procedure switch_arith_ops (op:String) is
    begin
@@ -172,7 +189,12 @@ begin
          instructions := parse_Instruction(To_String(ins));
          if To_String(instructions.op) = "pop" or To_String(instructions.op) = "push" then
             switch_stack_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
-         elsif To_String(instructions.op) = "label" or To_String(instructions.op) = "goto"  or To_String(instructions.op) = "if-goto" or To_String(instructions.op) = "call" or To_String(instructions.op) = "return"  or To_String(instructions.op) = "function" then
+         elsif To_String(instructions.op) = "label" or
+           To_String(instructions.op) = "goto"  or
+           To_String(instructions.op) = "if-goto" or
+           To_String(instructions.op) = "call" or
+           To_String(instructions.op) = "return"  or
+           To_String(instructions.op) = "function" then
              switch_functions_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
          else
             switch_arith_ops(To_String(instructions.op));
@@ -184,7 +206,7 @@ begin
       Close(f_in);
    end read_file;
 
-      Function parse_Instruction(Line: String) return instruction_record is
+   Function parse_Instruction(Line: String) return instruction_record is
    -- 1. separate the instruction by finding the index of ' '
    -- 2. delete that part of the string
    -- 3. send in loop again until there is we are returned -1
@@ -194,6 +216,8 @@ begin
       arr: Utils.String_Array := (1..1000=> To_Unbounded_String(""));
    begin
       arr := Utils.split_string(Line);
+      Put_Line(Item => Line);
+      -- NO INSTRUCTION:
       if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq" and arr(1) /= "gt"
         and arr(1) /= "lt" and arr(1) /= "#lt" and arr(1) /= "and" and arr(1) /= "or" and arr(1) /= "not" and arr(1) /= "neg"
         and arr(1) /= "label" and arr(1) /= "if-goto" and arr(1) /= "goto" and arr(1) /= "call" and arr(1) /= "return"
@@ -203,26 +227,26 @@ begin
          ins.arg := 0;
          --  Put_Line(File => o_file, item => To_String(arr(1)));
       else
-       if (arr(1)) /= "" and (arr(2)) /= "" and (arr(3)) = "" then --not label
+         if arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
             ins.op := (arr(1));
-           Put_Line(To_String(arr(1)));
-             if arr(2) /= "" then
-               ins.label := (arr(2));
-         else
-               ins.op := (arr(1));
-               Put_Line(To_String(arr(1)));
-
-                  --  Put_Line(File => o_file, item => To_String(arr(1)));
-            if arr(2) /= "" then
-               ins.label := (arr(2));
-               -- Put_Line(File => o_file, item => To_String(arr(2)));
-               if arr(3) /= "" then
-                  ins.arg := Utils.string_to_int(To_String(arr(3)));
-                  --  Put_Line(File => o_file, item => To_String(arr(3)));
-               end if;
-            end if;
-            end if;
+            ins.label := arr(2);
+            ins.arg := Utils.string_to_int(To_String(arr(3)));
          end if;
+         -- 2 WORDS:
+         if (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" and (arr(3)) = "" then -- label
+-- label c
+            ins.op := (arr(1));
+            Put_Line(To_String(arr(1)));
+            ins.label := arr(2);
+            ins.arg := 0;
+         end if;
+
+      end if;
+         -- 1 WORD:
+      if arr(1) = "return" then
+         ins.op := arr(1);
+         ins.label := To_Unbounded_String("");
+         ins.arg := 0;
       end if;
       return ins;
    end parse_Instruction;

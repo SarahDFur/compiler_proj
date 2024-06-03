@@ -10,15 +10,15 @@ package CodeWriter is
    
    -- ARITHMATIC & LOGIC FUNCTIONS: --
    procedure write_add;
-      -- writes to file HACK code for "sub x y"
+   -- writes to file HACK code for "sub x y"
    procedure write_sub ;
    -- writes to file HACK code for "-x"
    procedure write_neg ;
    -- writes to file HACK code for "x and y"
    procedure write_and ;
-      -- writes to file HACK code for "x or y"
+   -- writes to file HACK code for "x or y"
    procedure write_or ;
-     -- writes to file HACK code for "not x"
+   -- writes to file HACK code for "not x"
    procedure write_not ;
    
    procedure write_eq;
@@ -69,6 +69,4 @@ package CodeWriter is
    procedure write_goto(label: String);
    procedure write_if_goto (label:String) ;
    
-   
-   
-   end CodeWriter;
+end CodeWriter;

@@ -49,7 +49,7 @@ package body Utils is
       --Ada.Text_IO.Put_Line("The index of the first non-space character is: " & Natural'Image(Index));
 
       -- Split the string into array elements
-      for I in Index .. Natural(Length(S)) loop
+      for I in 1 .. Natural(Length(S)) loop
          if Element(S, I) = ' ' then
                Arr(Counter) := Temp;
                Counter := Counter + 1;
