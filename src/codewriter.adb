@@ -811,5 +811,31 @@ package body CodeWriter is
    end write_return;
 
 
+  procedure write_label (label:String) is
+   begin
+      Put_Line (File => Parser.o_file, Item => "//LABEL");
+      Put_Line (File => Parser.o_file, Item => "("&To_String(file_name)&"."&label&")");
+   end write_label;
+
+   procedure write_goto (label:String)is
+   begin
+      Put_Line (File => Parser.o_file, Item => "//GOTO");
+      Put_Line (File => Parser.o_file, Item => "("&To_String (file_name)&"."&label&")");
+      Put_Line (File => Parser.o_file, Item => "0; JMP");
+
+   end write_goto;
+
+   procedure write_if_goto (label:String) is
+
+   begin
+      Put_Line (File => Parser.o_file, Item => "//IF_GOTO");
+      Put_Line (File => Parser.o_file, Item => "@SP");
+      Put_Line (File => Parser.o_file, Item => "M=M-1");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      Put_Line(File => Parser.o_file, Item => "@" &To_String (file_name)&"."&label);
+      Put_Line (File => Parser.o_file, Item => "D;JNE");
+
+    end write_if_goto;
 
 end CodeWriter;

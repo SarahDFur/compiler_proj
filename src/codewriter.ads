@@ -64,4 +64,11 @@ package CodeWriter is
    procedure write_function(func_name: String; pass_var_num: Integer);
    procedure write_return;
    
-end CodeWriter;
+   --label-
+   procedure write_label (label:String);
+procedure write_goto(label: String);
+   procedure write_if_goto (label:String) ;
+   
+   
+   
+   end CodeWriter;
