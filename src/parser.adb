@@ -117,7 +117,7 @@ package body Parser is
          elsif label = "static" then
             CodeWriter.pop_static(argument);
          elsif label = "pointer" then
-            CodeWriter.push_ptr(argument); -- typo in original code, should be pop_ptr
+            CodeWriter.pop_ptr(argument); -- typo in original code, should be pop_ptr
          else
             -- Handle invalid label for "pop" operation (optional)
             null;
