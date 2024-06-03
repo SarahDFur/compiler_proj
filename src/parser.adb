@@ -188,7 +188,12 @@ package body Parser is
          --  Put_Line(To_String(ins));
          instructions := parse_Instruction(To_String(ins));
          if To_String(instructions.op) = "pop" or To_String(instructions.op) = "push" then
-            switch_stack_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
+            switch_stack_ops(
+                             op => To_String(instructions.op),
+                             label => To_String(instructions.label),
+                             argument => instructions.arg
+                            );
+
          elsif To_String(instructions.op) = "label" or
            To_String(instructions.op) = "goto"  or
            To_String(instructions.op) = "if-goto" or

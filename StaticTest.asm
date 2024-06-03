@@ -62,14 +62,6 @@ A = M
 M = D
 @SP
 M = M + 1
-//SUB
-@SP
- A=M-1
-D=M
-A=A-1
-M=M-D
-@SP
-M=M-1
 //PUSH STATIC
 @StaticTest.8
 D = M
@@ -78,11 +70,3 @@ A = M
 M = D
 @SP
 M = M + 1
-//ADD
-@SP
-A=M-1
-D=M
-A=A-1
-M=D+M
-@SP
-M=M-1

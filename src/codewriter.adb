@@ -314,7 +314,7 @@ package body CodeWriter is
    procedure push_local (argument : Integer) is
    begin
       Put_Line (File => Parser.o_file, Item => "//PUSH LCL");
-      Put_Line(File => Parser.o_file, Item => "@" & argument'Image (2 .. argument'Image'Length));
+      Put_Line(File => Parser.o_file, Item => "@" & argument'Image(2 .. argument'Image'Length));
       Put_Line(File => Parser.o_file,Item => "D=A");                 -- D = A = argument
 
       Put_Line(File => Parser.o_file, Item => "@LCL");               -- A = argument segment
@@ -493,6 +493,7 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"@SP");
       Put_Line(File => Parser.o_file, Item =>"M=M+1");
    end push_label;
+
    -- POP WRITE FUNCTIONS: --
    procedure pop_local (argument : Integer) is
 

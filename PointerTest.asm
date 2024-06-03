@@ -6,14 +6,14 @@ A = M
 M = D
 @SP
 M = M + 1
-//PUSH PTR 0
-@THIS
+//POP PTR 0
+@SP
+A = M - 1
 D = M
+@THIS
+ M= D
 @SP
-A = M
-M = D
-@SP
-M = M + 1
+M = M - 1
 //PUSH CONST
 @3040
 D = A
@@ -22,14 +22,14 @@ A = M
 M = D
 @SP
 M = M + 1
-//PUSH PTR 1
-@THAT
+//POP PTR 1
+@SP
+A = M - 1
 D = M
+@THAT
+ M= D
 @SP
-A = M
-M = D
-@SP
-M = M + 1
+M = M - 1
 //PUSH CONST
 @32
 D = A
@@ -44,6 +44,7 @@ A = M - 1
 D = M
 @THIS
 A = M
+A = A + 1
 A = A + 1
 M = D
 @SP
@@ -67,6 +68,7 @@ A = A + 1
 A = A + 1
 A = A + 1
 A = A + 1
+A = A + 1
 M = D
 @SP
 M = M - 1
@@ -86,14 +88,6 @@ A = M
 M = D
 @SP
 M = M + 1
-//ADD
-@SP
-A=M-1
-D=M
-A=A-1
-M=D+M
-@SP
-M=M-1
 //PUSH THIS
 @2
 D = A
@@ -105,14 +99,6 @@ A = M
 M = D
 @SP
 M = M + 1
-//SUB
-@SP
- A=M-1
-D=M
-A=A-1
-M=M-D
-@SP
-M=M-1
 //PUSH THAT
 @6
 D = A
@@ -124,11 +110,3 @@ A = M
 M = D
 @SP
 M = M + 1
-//ADD
-@SP
-A=M-1
-D=M
-A=A-1
-M=D+M
-@SP
-M=M-1
