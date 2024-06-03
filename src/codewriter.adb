@@ -689,11 +689,11 @@ package body CodeWriter is
    end pop_label;
 
    -- FUNCTION WRITE PROCEDURES --
-   procedure write_call(func_name: String, num_push_vars: Integer) is
+   procedure write_call(func_name: String; num_push_vars: Integer) is
+      n: Integer := num_push_vars - 5;
    begin
       Put_Line (File => Parser.o_file, Item => "// CALL");
-      Put_Line(File => Parser.o_file, Item =>"@" & To_String (file_name) & '.' &
-                 argument'Image (2 .. argument'Image'Length));
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".ReturnAddress");
       -- call g n:
       -- PUSH RETURN-ADDRESS
       Put_Line(File => Parser.o_file, Item =>"// push return-address");
@@ -716,7 +716,7 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"//ARG = SP - n - 5");
       Put_Line(File => Parser.o_file, Item =>"@SP");
       Put_Line(File => Parser.o_file, Item =>"D=M");
-      Put_Line(File => Parser.o_file, Item =>"@" & (num_push_vars - 5)'Image(2..num_push_vars'Image'Length));
+      Put_Line(File => Parser.o_file, Item =>"@" & n'Image(2..num_push_vars'Image'Length));
       Put_Line(File => Parser.o_file, Item =>"D=D-A");
       Put_Line(File => Parser.o_file, Item =>"@ARG");
       Put_Line(File => Parser.o_file, Item =>"M=D");
@@ -735,14 +735,14 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"(" & func_name & ".ReturnAddress" & ")");
    end write_call;
 
-   procedure write_function(func_name: String, pass_var_num: Integer) is
+   procedure write_function(func_name: String; pass_var_num: Integer) is
    begin
       -- Declaring a function 'func_name' with 'pass_var_num' local variables
       Put_Line(File => Parser.o_file, Item =>"// FUNCTION");
       -- label g
       Put_Line(File => Parser.o_file, Item =>"(" & func_name & ")");
       -- Initialize local variables to 0
-      Put_Line(File => Parser.o_file, Item =>"@" & (pass_var_num)'Image(2..pass_var_num'Image'Length));
+      Put_Line(File => Parser.o_file, Item =>"@" & pass_var_num'Image(2..pass_var_num'Image'Length));
       Put_Line(File => Parser.o_file, Item =>"D=A");
       Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".END");
       Put_Line(File => Parser.o_file, Item =>"D; JEQ");

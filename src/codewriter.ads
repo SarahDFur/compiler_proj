@@ -60,8 +60,8 @@ package CodeWriter is
    procedure pop_label(label: String);
 
    -- FUNCTION CALLS PROCEDURES --
-   procedure write_call(func_name: String, num_push_vars: Integer);
-   procedure write_function(func_name: String, pass_var_num: Integer);
+   procedure write_call(func_name: String; num_push_vars: Integer);
+   procedure write_function(func_name: String; pass_var_num: Integer);
    procedure write_return;
    
 end CodeWriter;
