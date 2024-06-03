@@ -31,42 +31,29 @@ package body Utils is
       return -1;
    end find_char_index;
 
-   function Split_String (Str: String) return String_Array is
-      Arr : String_Array := (1..1000=> To_Unbounded_String("")); -- Initialize the array
-      Counter : Natural := 1; -- For indexing the array elements
+   function split_string (str: String) return String_Array is
+      Arr : String_Array := (1..1000=> To_Unbounded_String("")); --not size cost
+      counter : Natural := 1; -- For indexing the array elements
       Temp : Unbounded_String := To_Unbounded_String("");
-      S : Unbounded_String := To_Unbounded_String(Str);
-      Index : Natural := 1;
-   begin
-      -- Find the first non-space character
-       while Index <= Length(S) loop
-         exit when Element(S, Index) /= ' ';
-         Index := Index + 1;
-      end loop;
-
-      -- Print the index of the first non-space character
-      --Ada.Text_IO.Put_Line("The index of the first non-space character is: " & Natural'Image(Index));
-
-      -- Split the string into array elements
+      S : Unbounded_String:=To_Unbounded_String(str);
+   begin 
       for I in 1 .. Natural(Length(S)) loop
          if Element(S, I) = ' ' then
-               Arr(Counter) := Temp;
-               Counter := Counter + 1;
-               Temp := To_Unbounded_String("");
-
+            -- Debug Print: Print the content of Temp
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Temp));
+            Arr(counter) := Temp;
+            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
+            counter := counter + 1;
+            Temp := To_Unbounded_String("");
          else
             Append(Temp, Element(S, I));
          end if;
+         if To_String(temp) /= "" then
+            Arr(counter) := Temp;
+         end if;
       end loop;
-
-      -- Add the last collected string to the array if not empty
-      if To_String(Temp) /= "" then
-         Arr(Counter) := Temp;
-      end if;
-   
       return Arr;
-   end Split_String;
-
+   end split_string;
 
    
 end Utils;

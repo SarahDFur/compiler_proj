@@ -1,3 +1,4 @@
+
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 package CodeWriter is
@@ -10,15 +11,15 @@ package CodeWriter is
    
    -- ARITHMATIC & LOGIC FUNCTIONS: --
    procedure write_add;
-   -- writes to file HACK code for "sub x y"
+      -- writes to file HACK code for "sub x y"
    procedure write_sub ;
    -- writes to file HACK code for "-x"
    procedure write_neg ;
    -- writes to file HACK code for "x and y"
    procedure write_and ;
-   -- writes to file HACK code for "x or y"
+      -- writes to file HACK code for "x or y"
    procedure write_or ;
-   -- writes to file HACK code for "not x"
+     -- writes to file HACK code for "not x"
    procedure write_not ;
    
    procedure write_eq;
@@ -27,7 +28,6 @@ package CodeWriter is
    
    procedure write_gt;
    
-   procedure write_hash_lt;
    -- PUSH WRITE FUNCTIONS: --
    -- GROUP 1:
    procedure push_local (argument: Integer);
@@ -42,8 +42,10 @@ package CodeWriter is
    procedure push_ptr (argument: Integer);
    -- GROUP 5:
    procedure push_const (argument: Integer);
-   -- PART 2: 
+   
+  -- PART 2: 
    procedure push_label(label: String);
+
 
    -- POP WRITE FUNCTIONS: --
    procedure pop_local (argument: Integer);
@@ -56,8 +58,9 @@ package CodeWriter is
    procedure pop_static (argument: Integer);
    -- GROUP 4:
    procedure pop_ptr (argument: Integer);
-   -- PART 2:
+      -- PART 2:
    procedure pop_label(label: String);
+
 
    -- FUNCTION CALLS PROCEDURES --
    procedure write_call(func_name: String; num_push_vars: Integer);
@@ -68,5 +71,4 @@ package CodeWriter is
    procedure write_label (label:String);
    procedure write_goto(label: String);
    procedure write_if_goto (label:String) ;
-   
 end CodeWriter;
