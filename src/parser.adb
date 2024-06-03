@@ -10,7 +10,6 @@ package body Parser is
 
    --  o_file: File_Type; -- output file ASM
    --  type String_Array is array (Positive range <>) of Unbounded_String;
-
    procedure init_parser(full_ofname:String) is
       -- VARAIBLE that contains all the .vm file names in the current directory ( add a function in Utils )
       S : Unbounded_String := To_Unbounded_String("");
@@ -68,6 +67,7 @@ package body Parser is
          Put_Line (File => o_file, Item => "@SP");
          Put_Line (File => o_file, Item => "M=D");
          CodeWriter.write_call("Sys.init", 0);
+         --  Put_Line(Item => "Sys exists");
       end if;
       -- Debug Print: Print the content of Arr
       for I in 1 .. counter - 1 loop
@@ -218,14 +218,14 @@ package body Parser is
       arr := Utils.split_string(Line);
       Put_Line(Item => Line);
       -- NO INSTRUCTION:
-      if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq" and arr(1) /= "gt"
-        and arr(1) /= "lt" and arr(1) /= "#lt" and arr(1) /= "and" and arr(1) /= "or" and arr(1) /= "not" and arr(1) /= "neg"
-        and arr(1) /= "label" and arr(1) /= "if-goto" and arr(1) /= "goto" and arr(1) /= "call" and arr(1) /= "return"
-        and arr(1) /= "function" then
+      if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq"
+        and arr(1) /= "gt" and arr(1) /= "lt" and arr(1) /= "#lt" and arr(1) /= "and" and arr(1) /= "or"
+        and arr(1) /= "not" and arr(1) /= "neg" and arr(1) /= "label" and arr(1) /= "if-goto" and arr(1) /= "goto"
+        and arr(1) /= "call" and arr(1) /= "return" and arr(1) /= "function" then
          ins.op := To_Unbounded_String("//");
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
-         --  Put_Line(File => o_file, item => To_String(arr(1)));
+         Put_Line(item => "at instruction check: " & To_String(arr(1)));
       else
          if arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
             ins.op := (arr(1));
@@ -233,8 +233,7 @@ package body Parser is
             ins.arg := Utils.string_to_int(To_String(arr(3)));
          end if;
          -- 2 WORDS:
-         if (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" and (arr(3)) = "" then -- label
--- label c
+         if (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
             ins.op := (arr(1));
             Put_Line(To_String(arr(1)));
             ins.label := arr(2);

@@ -31,7 +31,6 @@ package body Utils is
       return -1;
    end find_char_index;
 
-
    function Split_String (Str: String) return String_Array is
       Arr : String_Array := (1..1000=> To_Unbounded_String("")); -- Initialize the array
       Counter : Natural := 1; -- For indexing the array elements
