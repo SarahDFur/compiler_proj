@@ -187,12 +187,7 @@ package body Parser is
          --  Put_Line(To_String(ins));
          instructions := parse_Instruction(To_String(ins));
          if To_String(instructions.op) = "pop" or To_String(instructions.op) = "push" then
-            switch_stack_ops(
-                             op => To_String(instructions.op),
-                             label => To_String(instructions.label),
-                             argument => instructions.arg
-                            );
-
+            switch_stack_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
          elsif To_String(instructions.op) = "label" or
            To_String(instructions.op) = "goto"  or
            To_String(instructions.op) = "if-goto" or
@@ -236,20 +231,21 @@ Function parse_Instruction(Line: String) return instruction_record is
             ins.arg := Utils.string_to_int(To_String(arr(3)));
          end if;
          -- 2 WORDS:
-         if (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
+        elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
             ins.op := (arr(1));
             Put_Line(To_String(arr(1)));
             ins.label := arr(2);
             ins.arg := 0;
          end if;
 
-      end if;
          -- 1 WORD:
-      if arr(1) = "return" then
+      elsif arr(1) = "return" then
          ins.op := arr(1);
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
-      end if;
+         end if;
+               end if;
+
       return ins;
    end parse_Instruction;
 

@@ -251,41 +251,9 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item => "A = M + D");
       Put_Line(File => Parser.o_file, Item => "D = M");
 
-<<<<<<< HEAD
-      Put_Line (File => Parser.o_file, Item => "@SP");
-      Put_Line (File => Parser.o_file, Item => "A=M-1");
-      Put_Line (File => Parser.o_file, Item => "A=A-1");
-      Put_Line (File => Parser.o_file, Item => "M=R5");
-      Put_Line
-        (File => Parser.o_file,
-         Item => "(" & To_String (Output_Line_false) & ")");
-
-      EQ_Counter_false := EQ_Counter_false + 1;
-      Put_Line (File => Parser.o_file, Item => "@SP");
-      Put_Line (File => Parser.o_file, Item => "M=M-1");
-   end write_hash_lt;
-
-   -- PUSH WRITE FUNCTIONS: --
-   procedure push_local (argument : Integer) is
-   begin
-      Put_Line (File => Parser.o_file, Item => "//PUSH LCL");
-      Put_Line(File => Parser.o_file, Item => "@" & argument'Image(2 .. argument'Image'Length));
-      Put_Line(File => Parser.o_file,Item => "D=A");                 -- D = A = argument
-
-      Put_Line(File => Parser.o_file, Item => "@LCL");               -- A = argument segment
-      --  Put_Line(File => Parser.o_file,Item => "D = A");                 -- D = A = argument
-
-      Put_Line (File => Parser.o_file, Item => "A= M+D");
-      Put_Line (File => Parser.o_file, Item => "D=M");
-
-      Put_Line(File => Parser.o_file,Item => "@SP");                    -- A = SP = 0
-      Put_Line (File => Parser.o_file, Item => "A=M");
-      Put_Line (File => Parser.o_file, Item => "M= D");
-=======
       Put_Line(File => Parser.o_file, Item => "@SP");                    -- A = SP = 0
       Put_Line(File => Parser.o_file, Item => "A = M");                -- A = RAM[A] = top of stack
       Put_Line(File => Parser.o_file, Item => "M = D");                -- M = RAM[A] = RAM[top of stack] = D = argument
->>>>>>> d0bea5ce7d60137c28a415ac6083c8f70ed28a4b
 
       Put_Line(File => Parser.o_file, Item => "@SP");                   -- A = 0
       Put_Line(File => Parser.o_file, Item => "M = M + 1");        --  RAM[A] = RAM[A] + 1 = next free place
@@ -438,21 +406,6 @@ package body CodeWriter is
       --  Close(file);
    end push_const;
 
-<<<<<<< HEAD
-   procedure push_label(label: String) is
-   begin
-      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL");
-      Put_Line(File => Parser.o_file, Item =>"@" & label);
-      Put_Line(File => Parser.o_file, Item =>"D=M");
-      Put_Line(File => Parser.o_file, Item =>"@SP");
-      Put_Line(File => Parser.o_file, Item =>"A=M");
-      Put_Line(File => Parser.o_file, Item =>"M=D");
-      Put_Line(File => Parser.o_file, Item =>"@SP");
-      Put_Line(File => Parser.o_file, Item =>"M=M+1");
-   end push_label;
-
-=======
->>>>>>> d0bea5ce7d60137c28a415ac6083c8f70ed28a4b
    -- POP WRITE FUNCTIONS: --
    procedure pop_local (argument: Integer) is
    begin
