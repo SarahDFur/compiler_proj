@@ -42,6 +42,8 @@ package CodeWriter is
    procedure push_ptr (argument: Integer);
    -- GROUP 5:
    procedure push_const (argument: Integer);
+   -- PART 2: 
+   procedure push_label(label: String);
 
    -- POP WRITE FUNCTIONS: --
    procedure pop_local (argument: Integer);
@@ -54,5 +56,12 @@ package CodeWriter is
    procedure pop_static (argument: Integer);
    -- GROUP 4:
    procedure pop_ptr (argument: Integer);
+   -- PART 2:
+   procedure pop_label(label: String);
 
+   -- FUNCTION CALLS PROCEDURES --
+   procedure write_call(func_name: String, num_push_vars: Integer);
+   procedure write_function(func_name: String, pass_var_num: Integer);
+   procedure write_return;
+   
 end CodeWriter;

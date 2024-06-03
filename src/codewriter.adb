@@ -481,6 +481,17 @@ package body CodeWriter is
       --  Close(file);
    end push_const;
 
+   procedure push_label(label: String) is
+   begin
+      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL");
+      Put_Line(File => Parser.o_file, Item =>"@" & label);
+      Put_Line(File => Parser.o_file, Item =>"D=M");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"A=M");
+      Put_Line(File => Parser.o_file, Item =>"M=D");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"M=M+1");
+   end push_label;
    -- POP WRITE FUNCTIONS: --
    procedure pop_local (argument : Integer) is
 
@@ -665,5 +676,140 @@ package body CodeWriter is
 
       --  Close(file);
    end pop_ptr;
+
+   procedure pop_label(label: String) is
+   begin
+      -- 'LABEL' = *(FRAME - (index)):
+      Put_Line (File => Parser.o_file, Item => "@LCL");
+      Put_Line (File => Parser.o_file, Item => "M=M-1");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      Put_Line (File => Parser.o_file, Item => "@THAT");
+      Put_Line (File => Parser.o_file, Item => "M=D");
+   end pop_label;
+
+   -- FUNCTION WRITE PROCEDURES --
+   procedure write_call(func_name: String, num_push_vars: Integer) is
+   begin
+      Put_Line (File => Parser.o_file, Item => "// CALL");
+      Put_Line(File => Parser.o_file, Item =>"@" & To_String (file_name) & '.' &
+                 argument'Image (2 .. argument'Image'Length));
+      -- call g n:
+      -- PUSH RETURN-ADDRESS
+      Put_Line(File => Parser.o_file, Item =>"// push return-address");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".ReturnAddress");
+      Put_Line(File => Parser.o_file, Item =>"D=A");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"A=M");
+      Put_Line(File => Parser.o_file, Item =>"M=D");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"M=M+1");
+      -- PUSH LCL
+      push_label("LCL");
+      -- PUSH ARG
+      push_label("ARG");
+      -- PUSH THIS
+      push_label("THIS");
+      -- PUSH THAT
+      push_label("THAT");
+      -- ARG = SP-n-5
+      Put_Line(File => Parser.o_file, Item =>"//ARG = SP - n - 5");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"D=M");
+      Put_Line(File => Parser.o_file, Item =>"@" & (num_push_vars - 5)'Image(2..num_push_vars'Image'Length));
+      Put_Line(File => Parser.o_file, Item =>"D=D-A");
+      Put_Line(File => Parser.o_file, Item =>"@ARG");
+      Put_Line(File => Parser.o_file, Item =>"M=D");
+      -- LCL = SP
+      Put_Line(File => Parser.o_file, Item =>"// LCL = SP");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"D=M");
+      Put_Line(File => Parser.o_file, Item =>"@LCL");
+      Put_Line(File => Parser.o_file, Item =>"M=D");
+      -- goto g
+      Put_Line(File => Parser.o_file, Item =>"// goto g");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name);
+      Put_Line(File => Parser.o_file, Item =>"0; JMP");
+      -- label return-address
+      Put_Line(File => Parser.o_file, Item =>"// label return-address");
+      Put_Line(File => Parser.o_file, Item =>"(" & func_name & ".ReturnAddress" & ")");
+   end write_call;
+
+   procedure write_function(func_name: String, pass_var_num: Integer) is
+   begin
+      -- Declaring a function 'func_name' with 'pass_var_num' local variables
+      Put_Line(File => Parser.o_file, Item =>"// FUNCTION");
+      -- label g
+      Put_Line(File => Parser.o_file, Item =>"(" & func_name & ")");
+      -- Initialize local variables to 0
+      Put_Line(File => Parser.o_file, Item =>"@" & (pass_var_num)'Image(2..pass_var_num'Image'Length));
+      Put_Line(File => Parser.o_file, Item =>"D=A");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".END");
+      Put_Line(File => Parser.o_file, Item =>"D; JEQ");
+      -- jump if false (k != 0)
+      Put_Line(File => Parser.o_file, Item =>"(" & func_name & ".Loop)");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"A=M");
+      Put_Line(File => Parser.o_file, Item =>"M=0");
+      Put_Line(File => Parser.o_file, Item =>"@SP");
+      Put_Line(File => Parser.o_file, Item =>"M=M+1");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".Loop");
+      -- jump while (k != 0)
+      Put_Line(File => Parser.o_file, Item =>"D=D-1; JNE");
+      -- end when true: (k == 0)
+      Put_Line(File => Parser.o_file, Item => "(" & func_name & ".END)");
+
+   end write_function;
+
+   procedure write_return is
+   begin
+      -- FRAME = LCL
+      Put_Line (File => Parser.o_file, Item => "// FRAME = LCL");
+      Put_Line (File => Parser.o_file, Item => "@LCL");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      -- RET = *(FRAME-5)
+      Put_Line (File => Parser.o_file, Item => "// RET = *(FRAME - 5)");
+      Put_Line (File => Parser.o_file, Item => "// RAM[13] = (LOCAL - 5)");
+      Put_Line (File => Parser.o_file, Item => "@5");
+      Put_Line (File => Parser.o_file, Item => "A=D-A");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      Put_Line (File => Parser.o_file, Item => "@13");
+      Put_Line (File => Parser.o_file, Item => "M=D");
+      -- *ARG = pop()
+      Put_Line (File => Parser.o_file, Item => "// *ARG = pop()");
+      Put_Line (File => Parser.o_file, Item => "@SP");
+      Put_Line (File => Parser.o_file, Item => "M=M-1");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      Put_Line (File => Parser.o_file, Item => "@ARG");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "M=D");
+      -- SP = ARG + 1
+      Put_Line (File => Parser.o_file, Item => "// SP = ARG + 1");
+      Put_Line (File => Parser.o_file, Item => "@ARG");
+      Put_Line (File => Parser.o_file, Item => "D=M");
+      Put_Line (File => Parser.o_file, Item => "@SP");
+      Put_Line (File => Parser.o_file, Item => "M=D+1");
+      -- THAT = *(FRAME-1)
+      Put_Line (File => Parser.o_file, Item => "// THAT = *(FRAME - 1)");
+      pop_label("THAT");
+      -- THIS = *(FRAME-2)
+      Put_Line (File => Parser.o_file, Item => "// THIS = *(FRAME - 2)");
+      pop_label("THIS");
+      -- ARG = *(FRAME-3)
+      Put_Line (File => Parser.o_file, Item => "// ARG = *(FRAME - 3)");
+      pop_label("ARG");
+      -- LCL = *(FRAME-4)
+      Put_Line (File => Parser.o_file, Item => "// LCL = *(FRAME - 4)");
+      pop_label("LCL");
+      -- goto RET
+      Put_Line (File => Parser.o_file, Item => "// goto RET");
+      Put_Line (File => Parser.o_file, Item => "@!3");
+      Put_Line (File => Parser.o_file, Item => "A=M");
+      Put_Line (File => Parser.o_file, Item => "0; JMP");
+
+   end write_return;
+
+
 
 end CodeWriter;
