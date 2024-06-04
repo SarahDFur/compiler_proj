@@ -150,6 +150,7 @@ package body Parser is
       end if;
 
    end switch_arith_ops;
+
    procedure switch_functions_ops (op: String; label : String; argument: Integer) is
    begin
       if op = "label" then
@@ -204,14 +205,15 @@ package body Parser is
       CodeWriter.init_f(To_Unbounded_String("")); -- make the current file name an empty string once more
       Close(f_in);
    end read_file;
-   Function parse_Instruction(Line: String) return instruction_record is
+
+   function parse_Instruction(Line: String) return instruction_record is
       -- 1. separate the instruction by finding the index of ' '
       -- 2. delete that part of the string
       -- 3. send in loop again until there is we are returned -1
       -- 4. then use that last one for what is needed
       -- (usually changed to number, but need to check based on all options!)
       ins: instruction_record;
-      arr: Utils.String_Array := (1..1000=> To_Unbounded_String(""));
+      arr: Utils.String_Array := (1..3000=> To_Unbounded_String(""));
    begin
       arr := Utils.split_string(Line);
       Put_Line(Item => Line);
@@ -224,14 +226,24 @@ package body Parser is
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
          --  Put_Line(item => "at instruction check: " & To_String(arr(1)));
+         -- 3 WORDS:
       elsif arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
-         ins.op := (arr(1));
-         ins.label := arr(2);
-         ins.arg := Utils.string_to_int(To_String(arr(3)));
+         ins.op := arr(1);
+         if arr(2) /= "//" then
+            ins.label := arr(2);
+         end if;
+         if arr(3) /= "//" then
+
+            ins.arg := Utils.string_to_int(
+                                           To_String(
+                                             Utils.Remove_Whitespace(To_String(arr(3)))
+                                            ));
+            Put_Line(Item => To_String("Third param: " & arr(3)));
+         end if;
          -- 2 WORDS:
-      elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and (arr(2)) /= "" then -- label
-         ins.op := (arr(1));
-         Put_Line(To_String(arr(1)));
+      elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and arr(2) /= "" then -- label
+         ins.op := arr(1);
+         --  Put_Line(To_String(arr(1)));
          ins.label := arr(2);
          ins.arg := 0;
          -- 1 WORD:
