@@ -30,7 +30,7 @@ package body Utils is
    end find_char_index;
 
    function split_string (str: String) return String_Array is
-      Arr : String_Array := (1..3000=> To_Unbounded_String("")); --not size cost
+      Arr : String_Array := (1..200=> To_Unbounded_String("")); --not size cost
       counter : Natural := 1; -- For indexing the array elements
       Temp : Unbounded_String := To_Unbounded_String("");
       S : Unbounded_String:=To_Unbounded_String(str);
@@ -40,7 +40,7 @@ package body Utils is
             -- Debug Print: Print the content of Temp
             --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Temp));
             Arr(counter) := Temp;
-            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
+           -- Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
             counter := counter + 1;
             Temp := To_Unbounded_String("");
          else
@@ -68,8 +68,8 @@ package body Utils is
             Append(Original_String, '_');
          end if;
       end loop;
-      Put_Line ("     Original string: " & To_String(Original_String));
-      Put_Line ("     Trimmed string: " & To_String(Trimmed_String));
+     -- Put_Line ("     Original string: " & To_String(Original_String));
+      --Put_Line ("     Trimmed string: " & To_String(Trimmed_String));
       return Trimmed_String;
    end Remove_Whitespace;
 end Utils;

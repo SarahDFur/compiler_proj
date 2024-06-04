@@ -72,9 +72,9 @@ package body Parser is
       end if;
       -- Debug Print: Print the content of Arr
       for I in 1 .. counter - 1 loop
-         --  if Arr(I) /= "Sys.vm" then
+         if Arr(I) /= "sys.vm" then
             read_file(To_String(Arr(I)));
-         --  end if;
+         end if;
       end loop;
       Close(o_file);
    end init_parser;
@@ -181,9 +181,7 @@ package body Parser is
    begin
       Put_Line(if_name);
       Open(File => f_in, Mode => In_File, Name => if_name); -- the input file with the .vm extenssion
-
       CodeWriter.init_f(name); -- initialize the input file name in the codewriter for ease of use in labels, static etc.
-
       while not End_Of_File(f_in) loop
          ins := To_Unbounded_String(Get_Line (File => f_in));
          --  Put_Line(To_String(ins));
@@ -197,8 +195,12 @@ package body Parser is
            To_String(instructions.op) = "return"  or
            To_String(instructions.op) = "function" then
             switch_functions_ops(op => To_String(instructions.op), label => To_String(instructions.label), argument => instructions.arg);
-         else
+         elsif To_String(instructions.op) = "add"  or To_String(instructions.op) = "sub"  or To_String(instructions.op) = "eq"
+           or To_String(instructions.op) = "gt"  or To_String(instructions.op) = "lt"  or To_String(instructions.op) = "and"
+           or To_String(instructions.op) = "or"  or To_String(instructions.op) = "not"  or To_String(instructions.op) = "neg" then
             switch_arith_ops(To_String(instructions.op));
+         else
+            null;
          end if;
          ins := To_Unbounded_String("");
       end loop;
@@ -214,10 +216,13 @@ package body Parser is
       -- 4. then use that last one for what is needed
       -- (usually changed to number, but need to check based on all options!)
       ins: instruction_record;
-      arr: Utils.String_Array := (1..3000=> To_Unbounded_String(""));
+      arr: Utils.String_Array := (1..200=> To_Unbounded_String(""));
    begin
+
       arr := Utils.split_string(Line);
       Put_Line(Item => Line);
+         --       Put_Line(item => "at instruction check: " & To_String(arr(1)));
+
       -- NO INSTRUCTION:
       if arr(1) /= "push" and arr(1) /= "pop" and arr(1) /= "add" and arr(1) /= "sub" and arr(1) /= "eq"
         and arr(1) /= "gt" and arr(1) /= "lt" and arr(1) /= "#lt" and arr(1) /= "and" and arr(1) /= "or"
@@ -226,9 +231,9 @@ package body Parser is
          ins.op := To_Unbounded_String("//");
          ins.label := To_Unbounded_String("");
          ins.arg := 0;
-         --  Put_Line(item => "at instruction check: " & To_String(arr(1)));
          -- 3 WORDS:
       elsif arr(1) /= "" and arr(2) /= "" and arr(3) /= "" then
+         Put_Line(Item => Line);
          ins.op := arr(1);
          if arr(2) /= "//" then
             ins.label := arr(2);
@@ -239,7 +244,7 @@ package body Parser is
                                            To_String(
                                              Utils.Remove_Whitespace(To_String(arr(3)))
                                             ));
-            Put_Line(Item => To_String("Third param: " & arr(3)));
+         --   Put_Line(Item => To_String("Third param: " & arr(3)));
          end if;
          -- 2 WORDS:
       elsif (arr(1) = "label" or arr(1) = "goto" or arr(1) = "if-goto") and arr(2) /= "" then -- label

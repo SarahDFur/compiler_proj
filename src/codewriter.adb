@@ -226,6 +226,7 @@ package body CodeWriter is
           ("IF_FALSE" & To_String (file_name) &
                Integer'Image (EQ_Counter_false)
            (2 .. EQ_Counter_false'Image'Length));
+      --Put_Line("helpppp");
       --  Open(File => file, Mode => Out_File, Name => "out_f.asm");
       Put_Line (File => Parser.o_file, Item => "//LT");
       Put_Line (File => Parser.o_file, Item => "@SP");
@@ -851,3 +852,4 @@ package body CodeWriter is
    end write_if_goto;
 
 end CodeWriter;
+
