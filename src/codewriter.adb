@@ -487,7 +487,7 @@ package body CodeWriter is
 
    procedure push_label(label: String) is
    begin
-      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL" & label);
+      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL " & label);
       Put_Line(File => Parser.o_file, Item =>"@" & label);
       Put_Line(File => Parser.o_file, Item =>"D=M");
       Put_Line(File => Parser.o_file, Item =>"@SP");
@@ -684,18 +684,18 @@ package body CodeWriter is
    procedure pop_label(label: String) is
    begin
       -- 'LABEL' = *(FRAME - (index)):
-      Put_Line (File => Parser.o_file, Item => "// POP LABEL" & label);
+      Put_Line (File => Parser.o_file, Item => "// POP LABEL " & label);
       Put_Line (File => Parser.o_file, Item => "@LCL");
       Put_Line (File => Parser.o_file, Item => "M=M-1");
       Put_Line (File => Parser.o_file, Item => "A=M");
       Put_Line (File => Parser.o_file, Item => "D=M");
-      Put_Line (File => Parser.o_file, Item => "@THAT");
+      Put_Line (File => Parser.o_file, Item => "@" & label);
       Put_Line (File => Parser.o_file, Item => "M=D");
    end pop_label;
 
    -- FUNCTION WRITE PROCEDURES --
    procedure write_call(func_name: String; num_push_vars: Integer) is
-      n: Integer := num_push_vars - 5;
+      n: Integer := num_push_vars + 5;
    begin
       Output_Line :=
         To_Unbounded_String
@@ -744,7 +744,7 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"// label return-address");
       Put_Line(File => Parser.o_file, Item =>"(" & func_name &
                  ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length) & ")");
-      Func_Counter := Func_Counter + 1;
+      --  Func_Counter := Func_Counter + 1;
       Ret_Counter := Ret_Counter + 1;
    end write_call;
 
