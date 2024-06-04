@@ -66,7 +66,7 @@ package body Parser is
          Put_Line (File => o_file, Item => "D=A");
          Put_Line (File => o_file, Item => "@SP");
          Put_Line (File => o_file, Item => "M=D");
-         CodeWriter.write_call("Sys.init", 0);
+         read_file("Sys.vm");
          --  Put_Line(Item => "Sys exists");
       end if;
       -- Debug Print: Print the content of Arr
