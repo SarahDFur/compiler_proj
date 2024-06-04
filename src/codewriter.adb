@@ -700,12 +700,12 @@ package body CodeWriter is
         To_Unbounded_String
           (Integer'Image (Func_Counter) (2 .. Func_Counter'Image'Length));
       Put_Line (File => Parser.o_file, Item => "// CALL");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name & To_String(Output_Line) &
-                 ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length));
+      --  Put_Line(File => Parser.o_file, Item =>"@" & func_name &
+      --             ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length));
       -- call g n:
       -- PUSH RETURN-ADDRESS
       Put_Line(File => Parser.o_file, Item =>"// push return-address");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name & To_String(Output_Line) &
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name &
                  ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length));
       Put_Line(File => Parser.o_file, Item =>"D=A");
       Put_Line(File => Parser.o_file, Item =>"@SP");
@@ -737,11 +737,11 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"M=D");
       -- goto g
       Put_Line(File => Parser.o_file, Item =>"// goto g");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name  & To_String(Output_Line));
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name);
       Put_Line(File => Parser.o_file, Item =>"0; JMP");
       -- label return-address
       Put_Line(File => Parser.o_file, Item =>"// label return-address");
-      Put_Line(File => Parser.o_file, Item =>"(" & func_name  & To_String(Output_Line) &
+      Put_Line(File => Parser.o_file, Item =>"(" & func_name &
                  ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length) & ")");
       Func_Counter := Func_Counter + 1;
       Ret_Counter := Ret_Counter + 1;
@@ -775,6 +775,7 @@ package body CodeWriter is
 
    procedure write_return is
    begin
+      Put_Line(File => Parser.o_file, Item => "// RETURN");
       -- FRAME = LCL
       Put_Line (File => Parser.o_file, Item => "// FRAME = LCL");
       Put_Line (File => Parser.o_file, Item => "@LCL");

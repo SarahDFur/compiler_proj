@@ -66,14 +66,15 @@ package body Parser is
          Put_Line (File => o_file, Item => "D=A");
          Put_Line (File => o_file, Item => "@SP");
          Put_Line (File => o_file, Item => "M=D");
-         read_file("Sys.vm");
+         CodeWriter.write_call("Sys.init", 0);
+         --  read_file("Sys.vm");
          --  Put_Line(Item => "Sys exists");
       end if;
       -- Debug Print: Print the content of Arr
       for I in 1 .. counter - 1 loop
-         if Arr(I) /= "Sys.vm" then
+         --  if Arr(I) /= "Sys.vm" then
             read_file(To_String(Arr(I)));
-         end if;
+         --  end if;
       end loop;
       Close(o_file);
    end init_parser;
