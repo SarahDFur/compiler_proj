@@ -13,6 +13,8 @@ package body CodeWriter is
    --  File_Name : constant String := "out_f.asm";
    EQ_Counter       : Integer := 0;
    EQ_Counter_false : Integer := 0;
+   Func_Counter : Integer := 0;
+   Ret_Counter: Integer := 0;
    --  Output_Line : String := "@EQ_" & To_String(file_name) & "_" & Integer'Image (EQ_Counter);
    --  Output_Line_false : String := "@UPDATE_SP_" & To_String(file_name) & "_" & Integer'Image (EQ_Counter_false);
    Output_Line       : Unbounded_String;
@@ -484,7 +486,7 @@ package body CodeWriter is
 
    procedure push_label(label: String) is
    begin
-      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL");
+      Put_Line (File => Parser.o_file, Item => "//PUSH LABEL" & label);
       Put_Line(File => Parser.o_file, Item =>"@" & label);
       Put_Line(File => Parser.o_file, Item =>"D=M");
       Put_Line(File => Parser.o_file, Item =>"@SP");
@@ -681,6 +683,7 @@ package body CodeWriter is
    procedure pop_label(label: String) is
    begin
       -- 'LABEL' = *(FRAME - (index)):
+      Put_Line (File => Parser.o_file, Item => "// POP LABEL" & label);
       Put_Line (File => Parser.o_file, Item => "@LCL");
       Put_Line (File => Parser.o_file, Item => "M=M-1");
       Put_Line (File => Parser.o_file, Item => "A=M");
@@ -693,12 +696,17 @@ package body CodeWriter is
    procedure write_call(func_name: String; num_push_vars: Integer) is
       n: Integer := num_push_vars - 5;
    begin
+      Output_Line :=
+        To_Unbounded_String
+          (Integer'Image (Func_Counter) (2 .. Func_Counter'Image'Length));
       Put_Line (File => Parser.o_file, Item => "// CALL");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".ReturnAddress");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & To_String(Output_Line) &
+                 ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length));
       -- call g n:
       -- PUSH RETURN-ADDRESS
       Put_Line(File => Parser.o_file, Item =>"// push return-address");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name & ".ReturnAddress");
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name & To_String(Output_Line) &
+                 ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length));
       Put_Line(File => Parser.o_file, Item =>"D=A");
       Put_Line(File => Parser.o_file, Item =>"@SP");
       Put_Line(File => Parser.o_file, Item =>"A=M");
@@ -729,11 +737,14 @@ package body CodeWriter is
       Put_Line(File => Parser.o_file, Item =>"M=D");
       -- goto g
       Put_Line(File => Parser.o_file, Item =>"// goto g");
-      Put_Line(File => Parser.o_file, Item =>"@" & func_name);
+      Put_Line(File => Parser.o_file, Item =>"@" & func_name  & To_String(Output_Line));
       Put_Line(File => Parser.o_file, Item =>"0; JMP");
       -- label return-address
       Put_Line(File => Parser.o_file, Item =>"// label return-address");
-      Put_Line(File => Parser.o_file, Item =>"(" & func_name & ".ReturnAddress" & ")");
+      Put_Line(File => Parser.o_file, Item =>"(" & func_name  & To_String(Output_Line) &
+                 ".ReturnAddress" & Integer'Image (Ret_Counter) (2 .. Ret_Counter'Image'Length) & ")");
+      Func_Counter := Func_Counter + 1;
+      Ret_Counter := Ret_Counter + 1;
    end write_call;
 
    procedure write_function(func_name: String; pass_var_num: Integer) is
@@ -805,7 +816,7 @@ package body CodeWriter is
       pop_label("LCL");
       -- goto RET
       Put_Line (File => Parser.o_file, Item => "// goto RET");
-      Put_Line (File => Parser.o_file, Item => "@!3");
+      Put_Line (File => Parser.o_file, Item => "@13");
       Put_Line (File => Parser.o_file, Item => "A=M");
       Put_Line (File => Parser.o_file, Item => "0; JMP");
 
@@ -820,7 +831,7 @@ package body CodeWriter is
    procedure write_goto (label:String)is
    begin
       Put_Line (File => Parser.o_file, Item => "//GOTO");
-      Put_Line (File => Parser.o_file, Item => "("&To_String (file_name)&"."&label&")");
+      Put_Line (File => Parser.o_file, Item => "@"&To_String (file_name)&"."&label);
       Put_Line (File => Parser.o_file, Item => "0; JMP");
 
    end write_goto;
