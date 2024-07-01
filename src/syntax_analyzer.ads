@@ -21,5 +21,6 @@ package Syntax_Analyzer is
    --# EXPRESSIONS:
    procedure parse_expression;
    function parse_term (t: Unbounded_String) return Unbounded_String;
+   procedure parse_expressionList;
 
 end Syntax_Analyzer;
