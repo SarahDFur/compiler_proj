@@ -50,7 +50,7 @@ package body Syntax_Analyzer is
    end init_analyzer;
    --# PROGRAM STRUCTURE:
    procedure parse_class is
-      temp : Unounded_String := To_Unbounded_String("");
+      temp : Unbounded_String := To_Unbounded_String("");
    begin
       Put_Line(File => o_file, Item => "<class>");
       --  while not End_Of_File(in_file) loop
@@ -89,7 +89,7 @@ package body Syntax_Analyzer is
          end loop;
          
          --  temp := To_Unbounded_String(Get_Line(File => in_file));  -- <= already saved in the last loop
-         if To_String(temp) := "<symbol> } </symbol>" then
+         if To_String(temp) = "<symbol> } </symbol>" then
             Put_Line(File => o_file, Item => To_String(temp));
          end if;
       end if;    
@@ -126,7 +126,7 @@ package body Syntax_Analyzer is
    end parse_classVarDec;
    
    procedure parse_type (t: Unbounded_String) is
-      temp : Unounded_String := t;
+      temp : Unbounded_String := t;
    begin
       if To_String(temp) = "" then 
          temp := To_Unbounded_String(Get_Line(File => in_file));
@@ -168,10 +168,10 @@ package body Syntax_Analyzer is
          parse_subroutineBody;
       end if;
       null;
-   end parse_subroutingDec;
+   end parse_subroutineDec;
    
    procedure parse_parameterList is
-      temp: Unobounded_String := To_Unbounded_String("");
+      temp: Unbounded_String := To_Unbounded_String("");
    begin
       temp := To_Unbounded_String(Get_Line(File => in_file));
       if To_String(temp) /= "<symbol> ) </symbol>" then  -- indicates that there are no parameters
@@ -376,7 +376,7 @@ package body Syntax_Analyzer is
       --  temp := To_Unbounded_String(Get_Line(File => in_file));
       parse_expression;
       -- end line - ; symbol:
-      Pu_Line(File => o_file, Item => "<symbol> ; </symbol>");
+      Put_Line(File => o_file, Item => "<symbol> ; </symbol>");
       -- temp == NEXT token:
       temp := To_Unbounded_String(Get_Line(File => in_file));
       return temp;
@@ -438,7 +438,7 @@ package body Syntax_Analyzer is
             -- ( expressionList ):
             temp := To_Unbounded_String(Get_Line(File => in_file));
             Put_Line(File => o_file, Item => "<symbol> ( <symbol>");
-            expressionList;
+            parse_expressionList;
             Put_Line(File => o_file, Item => "<symbol> ) <symbol>");
          end if;
       -- '(' expression ')' :
@@ -452,13 +452,41 @@ package body Syntax_Analyzer is
       elsif To_String(temp) in "<symbol> = </symbol>" | "<symbol> ~ </symbol>" then
          Put_Line(File => o_file, Item => To_String(temp));
          temp := To_Unbounded_String(Get_Line(File => in_file));
-         parse_term(temp);
+         temp := parse_term(temp);
       end if;
 
       temp := To_Unbounded_String(Get_Line(File => in_file));
       return temp;
    end parse_term;
-   
+
+   procedure parse_subroutineCall is
+      temp : Unbounded_String := To_Unbounded_String("");
+   begin
+      -- subroutineName | className | varName:
+      temp := To_Unbounded_String(Get_Line(File => in_file));
+      Put_Line(File => o_file, Item => To_String(temp));
+      -----------------------------------------------------------------------------------------------
+      temp := To_Unbounded_String(Get_Line(File => in_file));
+      -- subroutineCall -> subroutineName '(' expressionList ')' :
+      if To_String(temp) = "<symbol> ( </symbol>" then
+         Put_Line(File => o_file, Item => To_String(temp));
+         parse_expressionList;
+         temp := To_Unbounded_String(Get_Line(File => in_file));
+         Put_Line(File => o_file, Item => "<symbol> ) <symbol>");
+         -- subroutineCall -> (className | varName) '.' subroutineName '(' expressionList ')' :
+      elsif To_String(temp) = "<symbol> . </symbol>" then
+         Put_Line(File => o_file, Item => To_String(temp));
+         -- subroutineName:
+         temp := To_Unbounded_String(Get_Line(File => in_file));
+         Put_Line(File => o_file, Item => To_String(temp));
+         -- ( expressionList ):
+         temp := To_Unbounded_String(Get_Line(File => in_file));
+         Put_Line(File => o_file, Item => "<symbol> ( <symbol>");
+         parse_expressionList;
+         Put_Line(File => o_file, Item => "<symbol> ) <symbol>");
+      end if;
+   end parse_subroutineCall;
+
    procedure parse_expressionList is
       temp: Unbounded_String := To_Unbounded_String("");
    begin
