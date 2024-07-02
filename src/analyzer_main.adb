@@ -1,6 +1,6 @@
 with Ada.Directories; use Ada.Directories;
 with Ada.Text_IO; use Ada.Text_IO;
-with Tokenizer; use Tokenizer;
+with Syntax_Analyzer; use Syntax_Analyzer;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 procedure analyzer_main is
@@ -15,7 +15,7 @@ begin
    Start_Search(Search, Current_Directory, "*T.xml", Filter); -- Start searching
    while More_Entries(Search) loop
       Get_Next_Entry(Search, Dir_Entry);
-      init_xml(To_Unbounded_String(Simple_Name(Dir_Entry)));
+      init_analyzer(To_Unbounded_String(Simple_Name(Dir_Entry)));
    end loop;
    End_Search(Search);
    null;

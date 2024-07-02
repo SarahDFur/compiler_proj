@@ -26,11 +26,11 @@ package body Syntax_Analyzer is
       -- The name of the current file we wish to *READ* from:
       name: Unbounded_String := To_Unbounded_String(
                                                     To_String(filename)
-                                                    (To_String(filename)'First..find_char_index(To_String(filename), '.')  - 1)
+                                                    (To_String(filename)'First..find_char_index(To_String(filename), '.')  - 2)
                                                    );
    begin
       -- 1.1. create file where filename = name & 'T.xml' for WRITING:
-      Create(File => o_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & "T.xml");
+      Create(File => o_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & ".xml");
       Close(o_file);
       -- 1.2 & 1.3 will be closed at the end of this procedure !
       -- 1.2. open the '.jack' file for READING:
