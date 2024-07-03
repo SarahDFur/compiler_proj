@@ -30,6 +30,7 @@ package body Tokenizer is
                                                     To_String(filename)
                                                     (To_String(filename)'First..find_char_index(To_String(filename), '.')  - 1)
                                                    );
+      ch : Character := Ada.Characters.Latin_1.NUL;
    begin
       -- 1.1. create file where filename = name & 'T.xml' for WRITING:
       Create(File => o_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & "T.xml");
@@ -44,71 +45,67 @@ package body Tokenizer is
       Put_Line(File => o_file, Item => "<tokens>");
       -- 3. each line must be separated to individual tokens
       while not End_Of_File(in_file) loop
-         q0_start;
+         ch := q0_start(ch);
       end loop;
+      if ch /= Ada.Characters.Latin_1.NUL then  -- in teh case where '}' is the last character in the file   
+         Put_Line(File => o_file, Item => "<symbol> } </symbol>");
+      end if;
+      
       Put_Line(File => o_file, Item => "</tokens>");
       Close(o_file);
       Close(in_file);
    end init_xml;
 
    --# Q0 - Starting point of the Automata:
-   procedure q0_start is
-      ch: Character := Ada.Characters.Latin_1.NUL;
+   function q0_start (char: Character := Ada.Characters.Latin_1.NUL) return Character is
+      ch: Character := char;
    begin
-      while not End_Of_File(in_file) loop
-         
+      --  while not End_Of_File(in_file) loop
+      if not End_Of_File(in_file) then
          -- Get the next character to read from the file
-         --  if ch = Ada.Characters.Latin_1.NUL then
+         if ch = Ada.Characters.Latin_1.NUL then
             Get(File => in_file, Item => ch);  
             Put_Line(Item => "character: " & ch);
             Put_Line(Item => "temp: " & To_String(temp));
-         --  end if;
-         -- Because we're at the start of the automata we need to call 
-         -- the appropriate procedure / function based on 'ch'
-         while ch = ASCII.HT or ch = ' ' loop
+         end if;
+         while (ch = ASCII.HT or ch = ' ') and (not End_Of_File(in_file)) loop
             Get(in_file, ch);
          end loop;
-
+         if End_Of_File(in_file) then
+            return Ada.Characters.Latin_1.NUL;
+         end if;
          -- 'Switch' Operation:
          -- Send to appropriate state:
          if ch in '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' then
             ch := q3_integer_constants(ch);
-            -- Send temp to be written into the output file:
-            --  check_type; -- get correct type if it was not set until now in one of the states
-            switch_write_tag(To_String(temp_type), To_String(temp));
          elsif ch in 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' 
            | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' 
              | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' 
                | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' | '_' then
             ch := q1_letters(ch);   -- keyword is in temp if run is successful
-            switch_write_tag(To_String(temp_type), To_String(temp));
-            temp := To_Unbounded_String("" & ch);
-            --  q0_start;
          elsif ch in '{' | '}' | '(' | ')' | '[' | ']' | '.' | ',' | ';' | ':' | '+' | '-' | '/' | '*' 
            | '&' | '|' | '<' | '>' | '=' | '~' then
             ch := q4_symbols(ch); -- symbol is in temp if run is successful
-            -- Send temp to be written into the output file:
-            --  check_type; -- get correct type if it was not set until now in one of the states
-            switch_write_tag(To_String(temp_type), To_String(temp));
-         --  elsif ch = '_' then
-         --     ch := q2_ids(ch);         -- identifier is in temp if run is successful
          elsif ch = '"' then  -- No need to send ch because we are saving the contents of the string without ' '
             q5_string_constants;  
-            --  ch := '';
-            -- Send temp to be written into the output file:
-            --  check_type; -- get correct type if it was not set until now in one of the states
-            switch_write_tag(To_String(temp_type), To_String(temp));
+            ch := ' '; -- to read the next 
          end if;
-         
          -- Nullify temp:
          temp := To_Unbounded_String(""); 
          temp_type := To_Unbounded_String("");
-         --  temp := To_Unbounded_String("" & ch);
-         --  Get(File => in_file, Item => ch);
-         --  if ch /= Character'Val(0) and ch /= ASCII.HT and ch /= ' ' then
-         --     Append(temp, ch);
+         --  if ch in '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P'
+         --    | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+         --      | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r'
+         --        | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' | '_' | '{' | '}' | '(' | ')' | '[' | ']' | '.' | ',' | ';' | ':' | '+' | '-' | '/' | '*'
+         --    | '&' | '|' | '<' | '>' | '=' | '~' | '"' then
+         --     return
          --  end if;
-      end loop;
+      else
+         return Ada.Characters.Latin_1.NUL;
+      end if;
+      --  end loop;
+      --  Get(in_file, ch);
+      return ch;
    end q0_start;
    --# Q1 - Keywords:
    function q1_letters (char: Character) return Character is
@@ -128,38 +125,14 @@ package body Tokenizer is
         | "char" |"void" | "var" | "static" | "let" | "do" | "if" | "else" | "while" | "return" 
           | "true" | "false" | "null" | "this" then
          temp_type := To_Unbounded_String("keyword");
+         switch_write_tag(To_String(temp_type), To_String(temp));
          return ch;
-         -- ELSE IF ch in NUMBERS or '_' => GOTO Q2
-      else -- ch in '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'_' then
-         --  temp := temp & ch;
+      else 
          temp_type := To_Unbounded_String("identifier");
+         switch_write_tag(To_String(temp_type), To_String(temp));
          return ch;
       end if;
    end q1_letters;
-   --# Q2 - Identifiers:
-   function q2_ids (char: Character) return Character is
-      ch: Character := char;
-   begin
-      -- ID will stop being an id if it is a symbol or ' (or ' '):
-      while not End_Of_File(in_file) loop
-         if ch in  '{'|'}'|'('|')'|'['|']'|'.'|','|':'|'+'|'-'|'/'|'*'|'&'|'|'|'<'|'>'|'='|'~'|'''|' ' then
-            -- No more numbers -> the integerConstant is finished
-            temp_type := To_Unbounded_String("identifier");  -- Set to the appropriate type ! :>
-            return ch;
-         end if;
-         temp := temp & ch;  -- First: temp = ch, then everything after will be added to it 
-         Get(in_file, ch);
-      end loop;
-      -- In the case of this being the last word:
-      if To_String(temp) in "class" | "method" | "field" | "function" | "constructor" | "int" | "boolean" 
-        | "char" |"void" | "var" | "static" | "let" | "do" | "if" | "else" | "while" | "return" 
-          | "true" | "false" | "null" | "this" then
-         temp_type := To_Unbounded_String("keyword");
-      else
-         temp_type := To_Unbounded_String("identifier");
-      end if;
-      return ch;
-   end q2_ids;
    --# Q3 - Integers:
    function q3_integer_constants (char: Character) return Character is
       ch: Character := char;
@@ -168,6 +141,7 @@ package body Tokenizer is
          if ch not in '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' then  
             -- No more numbers -> the integerConstant is finished
             temp_type := To_Unbounded_String("integerConstant");  -- Set to the appropriate type ! :>
+            switch_write_tag(To_String(temp_type), To_String(temp));
             return ch;
          end if;
          temp := temp & ch;  -- First: temp = ch, then everything after will be added to it 
@@ -175,6 +149,7 @@ package body Tokenizer is
       end loop;
       -- In the case of this being the last word:
       temp_type := To_Unbounded_String("integerConstant");  -- Set to the appropriate type ! :>
+      switch_write_tag(To_String(temp_type), To_String(temp));
       return ch;
    end q3_integer_constants;
    --# Q4 - Symbols:
@@ -191,7 +166,7 @@ package body Tokenizer is
                Put(ch);
             end loop;
             Skip_Line(File => in_file);
-         elsif ch = '*' then      -- Comment: /* */
+         elsif ch = '*' then      -- Comment: /* */        
             trash := To_Unbounded_String(""); -- make sure it's empty
             while trash /= "*/" loop
                Get(in_file, ch);
@@ -204,27 +179,39 @@ package body Tokenizer is
                   end if;
                end if;
             end loop;  
+         else
+            temp := To_Unbounded_String("/");
+            Put_Line("temp in symbol: " & To_String(temp));
+            temp_type := To_Unbounded_String("symbol");
+            switch_write_tag(To_String(temp_type), To_String(temp));
          end if;
       else                            -- ch = '/' for other things (not a comment)
          temp := temp & ch;
          Put_Line("temp in symbol: " & To_String(temp));
          temp_type := To_Unbounded_String("symbol");
+         switch_write_tag(To_String(temp_type), To_String(temp));
          --  Get(in_file,ch);
       end if;
-      --  Get(in_file,ch);
+      Get(in_file, ch);
       return ch;
+   exception 
+      when End_Error => ch := Ada.Characters.Latin_1.NUL;
+         return ch;
    end q4_symbols;
    --# Q5 - String Constants: 
    -- All strings 
    procedure q5_string_constants is
-      ch: Character := ' ';
+      ch: Character := Ada.Characters.Latin_1.NUL;
    begin
       while ch /= '"' and not End_Of_File(in_file) loop
-         temp := temp & ch;
+         if ch /= Ada.Characters.Latin_1.NUL then
+            temp := temp & ch;
+         end if;
          Get(in_file, ch);
       end loop;
       if ch = '"' then
          temp_type := To_Unbounded_String("stringConstant");  -- Set to the appropriate type ! :>
+         switch_write_tag(To_String(temp_type), To_String(temp));
       end if;
       --  temp_type := 'stringConstant';
    end q5_string_constants;
