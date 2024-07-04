@@ -12,7 +12,7 @@ package Syntax_Analyzer is
    procedure parse_parameterList;
    procedure parse_varDec;
    --# STATEMENTS:
-   procedure parse_statements (t: Unbounded_String);
+   function parse_statements (t: Unbounded_String) return Unbounded_String;
    function parse_statement (t : Unbounded_String) return Unbounded_String;
    function parse_letStatement (t: Unbounded_String) return Unbounded_String;
    function parse_ifStatement (t: Unbounded_String) return Unbounded_String;
@@ -20,9 +20,9 @@ package Syntax_Analyzer is
    function parse_doStatement (t: Unbounded_String) return Unbounded_String;
    function parse_returnStatement (t: Unbounded_String) return Unbounded_String;
    --# EXPRESSIONS:
-   procedure parse_expression;
-   function parse_term (t: Unbounded_String) return Unbounded_String;
-   procedure parse_subroutineCall;
-   procedure parse_expressionList;
+   function parse_expression (t : Unbounded_String := To_Unbounded_String("")) return Unbounded_String;
+   function parse_term (t: Unbounded_String  := To_Unbounded_String("")) return Unbounded_String;
+   function parse_subroutineCall (t : Unbounded_String := To_Unbounded_String("")) return Unbounded_String;
+   function parse_expressionList (t: Unbounded_String := To_Unbounded_String("")) return Unbounded_String;
 
 end Syntax_Analyzer;
