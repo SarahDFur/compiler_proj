@@ -12,7 +12,7 @@ begin
    -- files have extenssion of ".jack"
    -- send one file at a time to tokenizer init function
    -- creates files with the name and extenssion:  "...T.xml"
-   Start_Search(Search, Current_Directory, "*.jack", Filter); -- Start searching
+   Start_Search(Search, Current_Directory, "*T.xml", Filter); -- Start searching
    while More_Entries(Search) loop
       Get_Next_Entry(Search, Dir_Entry);
       init_analyzer(To_Unbounded_String(Simple_Name(Dir_Entry)));

@@ -34,6 +34,8 @@ package body SymbolTable is
       field_ids := 0;
       var_ids := 0;
       arg_ids := 0;
+      --TODO: We may need to add loops that clear all the unwanted information from a method scope
+      -- OR, we can add to the subroutine-scope and identify them all with the subroutine names . . . ?
    end startSubroutine;
    
    procedure define (name: Unbounded_String; var_type: Unbounded_String; kind: Unbounded_String) is

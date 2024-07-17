@@ -2,11 +2,32 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 package Code_Generation is
 
+      --# Identifiers:
+   -- className, subroutineName, varName
+
+   --# Globals:
+   curr_xml_file: File_Type;  -- reads from JACK file
+   curr_vm_file: File_Type;    --  writes to VM file
+   out_sym_tbl : File_Type;
+   --# Global Vars: LABEL COUNTERS:
+   count_if : Integer := 0;
+   count_else : Integer := 0;
+   count_before_while : Integer := 0;
+   count_after_while : Intger := 0;
+   --# Global Vars: Function Counters:
+   count_locals : Integer := 0;
+   count_args : Integer := 0;
+   --# Other Counters:
+   count_class_vars : Integer := 0;
+   --# Helper Variables:
+   sym_tbl_name : Unbounded_String := To_Unbounded_String("");
+   curr_class_name : Unbounded_String := To_Unbounded_Strin("");
+   curr_func_name : Unbounded_String := To_Unbounded_Strin("");
    procedure init_analyzer (filename: Unbounded_String);
    --# PROGRAM STRUCTURE:
    procedure parse_class;
    procedure parse_classVarDec (t: Unbounded_String);
-   procedure parse_type (t: Unbounded_String);
+   function parse_type (t: Unbounded_String) return Unbounded_String;
    procedure parse_subroutineDec (t: Unbounded_String);
    procedure parse_subroutineBody;
    procedure parse_parameterList;
@@ -24,6 +45,5 @@ package Code_Generation is
    function parse_term (t: Unbounded_String  := To_Unbounded_String("")) return Unbounded_String;
    function parse_subroutineCall (t : Unbounded_String := To_Unbounded_String("")) return Unbounded_String;
    function parse_expressionList (t: Unbounded_String := To_Unbounded_String("")) return Unbounded_String;
-
 
 end Code_Generation;
