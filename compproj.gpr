@@ -2,7 +2,7 @@ project Compproj is
 
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
-   for Main use ("analyzer_main.adb", "main.adb", "tokenizer_main.adb");
+   for Main use ("code_genreation_main.adb", "analyzer_main.adb", "main.adb", "tokenizer_main.adb");
 
    package Compiler is
       for Switches ("ada") use ("-gnat2020", "-g");
