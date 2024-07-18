@@ -28,6 +28,8 @@ package body SymbolTable is
    end Constructor;
 
    procedure startSubroutine is  -- will be called when we close a jack / xml file
+      temp_class : Unbounded_String := To_Unbounded_String("");
+      temp_method : Unbounded_String := To_Unbounded_String("");
    begin
       -- reset constant vars for next xxxT.xml file that we read
       static_ids := 0;
@@ -36,6 +38,19 @@ package body SymbolTable is
       arg_ids := 0;
       --TODO: We may need to add loops that clear all the unwanted information from a method scope
       -- OR, we can add to the subroutine-scope and identify them all with the subroutine names . . . ?
+      Open(File => in_symbol_table_file, Mode => In_File, Name => filename);
+      temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      while not End_Of_File(in_symbol_table_file) and To_String(temp)(1..14) /= "</class-scope>"  loop
+         temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      end loop;
+      temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      --  while not End_Of_File(in_symbol_table_file) loop
+      --     temp_method := To_Unbounded_String(To_String(temp_method) & Get_Line(in_symbol_table));
+      --  end loop;
+      Close(in_symbol_table_file);
+      Open(File => out_symbol_table_file, Mode => Out_File, Name => filename);
+      Put_Line(File => out_symbol_table_file, Item => temp_class);
+      Close(out_symbol_table_file);
    end startSubroutine;
    
    procedure define (name: Unbounded_String; var_type: Unbounded_String; kind: Unbounded_String) is

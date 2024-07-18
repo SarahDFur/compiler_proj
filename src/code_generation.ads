@@ -24,6 +24,8 @@ package Code_Generation is
    sym_tbl_name : Unbounded_String := To_Unbounded_String("");
    curr_class_name : Unbounded_String := To_Unbounded_String("");
    curr_func_name : Unbounded_String := To_Unbounded_String("");
+   stop_line : Integer := 0;
+    --  : Unbounded_String := To_unbounded_String("");
    type String_Array is array (Positive range <>) of Unbounded_String;
 
    procedure init_analyzer (filename: Unbounded_String);
