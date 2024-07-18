@@ -20,7 +20,7 @@ package body SymbolTable is
    var_ids : Integer := 0;
    arg_ids : Integer := 0;
    --# Create a Symbol Table
-   procedure Consturctor (name: Unbounded_String) is
+   procedure Constructor (name: Unbounded_String) is
    begin
       Create(File => out_symbol_table_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & "_symbol_table.txt");
       filename := To_String(name) & "_symbol_table.txt"; 

@@ -4,7 +4,7 @@ package SymbolTable is
 
    type String_Array is array (Positive range <>) of Unbounded_String;
    
-   procedure Consturctor (name: Unbounded_String);
+   procedure Constructor (name: Unbounded_String);
    procedure startSubroutine; 
    procedure define (name: Unbounded_String; var_type: Unbounded_String; kind: Unbounded_String);
    function varCount (kind: Unbounded_String) return Integer;  -- Might need to create global counters
