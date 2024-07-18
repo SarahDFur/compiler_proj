@@ -78,6 +78,7 @@ package body Code_Generation is
          --# <keyword> function | constructor | method </keyword>
          while To_String(temp) in "<keyword> constructor </keyword>" | "<keyword> function </keyword>"
            | "<keyword> method </keyword>" loop
+            is_void := False;
             SymbolTable.startSubroutine;
             parse_subroutineDec(temp);
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -163,13 +164,13 @@ package body Code_Generation is
       var_name : Unbounded_String := To_Unbounded_String("");
       var_type : Unbounded_String := To_Unbounded_String("");
       kind : Unbounded_String := To_Unbounded_String("");
-      is_void : Boolean := False;
    begin   
 --# Loop over the next section - parameter list and local vars. Save all the information to first line of method scope:
       declare
          helper_str : Unbounded_String := To_Unbounded_String("");
          -- Func helper vars:
-         func_type : Unbounded_String := To_Unbounded_String("");
+         func_type : Unbounded_String := t;
+         func_return_type : Unbounded_String := To_Unbounded_String("");
          func_name : Unbounded_String := To_Unbounded_String("");
          -- Counters:
          func_params : Unbounded_String := To_Unbounded_String("");
@@ -183,8 +184,8 @@ package body Code_Generation is
          --# <keyword> void </keyword>  ||  parse_type(helper_str)
          Put_Line(To_String(helper_str));
          if To_String(helper_str) /= "<keyword> void </keyword>" then
-            func_type := parse_type(helper_str);
-            func_info := func_info & func_type & " ";
+            func_return_type := parse_type(helper_str);
+            func_info := func_info & func_return_type & " ";
          else
             is_void := True;
             func_info := func_info & "void ";
@@ -200,7 +201,6 @@ package body Code_Generation is
          --# <symbol> ( </symbol>
          Put_Line(To_String(helper_str));
          --  if To_String(helper_str) = "<symbol> ( </symbol>" then
-         --  Put_Line(File => curr_vm_file, Item => "<parameterList>");
 --# PARAMETER LIST COUNT:
          helper_str := To_Unbounded_String(Get_Line(File => curr_xml_file));
          --# parse_type  ||  <symbol> ) </symbol>
@@ -279,16 +279,28 @@ package body Code_Generation is
          end loop;   
          func_info := func_info & count_locals'Image;
          
-         Open(File => out_sym_tbl, Mode => Append_File, Name => sym_tbl_name);
+         Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
          Put_Line(File => out_sym_tbl, Item => "<method-scope> " & To_String(func_info));
          Close(out_sym_tbl);
-         Put_Line(File => curr_vm_file, Item => "function" & curr_class_name & "." 
-                  & curr_func_name & " " &  Integer'Image (count_locals) (2 .. count_locals'Image'Length));
+         Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." 
+                  & To_String(curr_func_name) & " " &  Integer'Image (count_locals) (2 .. count_locals'Image'Length));
          count_args := 0;
          count_locals := 0;
+         if To_String(func_type) = "<keyword> constructor </keyword>" then
+            declare
+               count_fields : Integer := SymbolTable.varCount(To_Unbounded_String("FIELD"));
+            begin
+               Put_Line(File => curr_vm_file, Item => "push constant " & Integer'Image(count_fields)(2 .. count_fields'Image'Length));
+               Put_Line(File => curr_vm_file, Item => "call Memory.alloc 1");
+               Put_Line(File => curr_vm_file, Item => "pop pointer 0");
+            end;
+         elsif To_String(func_type) = "<keyword> method </keyword>" then 
+            Put_Line(File => curr_vm_file, Item => "push argument 0");
+            Put_Line(File => curr_vm_file, Item => "pop pointer 0");
+         end if;
       end;
       
-      Open(File => curr_xml_file, Mode => In_File, Name => xml_file_name);
+      Open(File => curr_xml_file, Mode => In_File, Name => To_String(xml_file_name));
       while stop_line /= 0 loop
          temp := To_unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line - 1;
@@ -388,19 +400,20 @@ package body Code_Generation is
       Close(out_sym_tbl);
       
       --# Loop over Method-Scope, and count how many local variables it contains:
-      Open(File => out_sym_tbl, Mode => In_File, Name => To_String(sym_tbl_name));
-      while not End_Of_File(out_sym_tbl) and To_String(temp) /= "</class-scope>" loop  -- skip class-scope
-         temp := To_Unbounded_String(Get_Line(File => out_sym_tbl));
-      end loop;
-      while not End_Of_File(out_sym_tbl) and To_String(temp) /= "</method-scope>" loop  -- count inside method-scope
-         temp := To_Unbounded_String(Get_Line(File => out_sym_tbl));
-         if To_String(temp) /= "<" then
-            if To_String(SymbolTable.kindOf(temp)) = "VAR" then
-               count_locals := count_locals + 1;
-            end if;
-         end if;
-      end loop;
-      Close(out_sym_tbl);
+      --  Open(File => out_sym_tbl, Mode => In_File, Name => To_String(sym_tbl_name));
+      --  while not End_Of_File(out_sym_tbl) and To_String(temp) /= "</class-scope>" loop  -- skip class-scope
+      --     temp := To_Unbounded_String(Get_Line(File => out_sym_tbl));
+      --  end loop;
+      --  while not End_Of_File(out_sym_tbl) and To_String(temp) /= "</method-scope>" loop  -- count inside method-scope
+      --     temp := To_Unbounded_String(Get_Line(File => out_sym_tbl));
+      --     if To_String(temp) /= "<" then
+      --        if To_String(SymbolTable.kindOf(temp)) = "VAR" then
+      --           count_locals := count_locals + 1;
+      --        end if;
+      --     end if;
+      --  end loop;
+      --  Close(out_sym_tbl);
+
       -- Until NOW we entered into the symbol table all the parameters and local vars in method-scope
       Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." & To_String(curr_func_name) & count_locals'Image);
       -- statements:       
@@ -653,21 +666,37 @@ package body Code_Generation is
    
    function parse_returnStatement (t: Unbounded_String) return Unbounded_String is
       temp : Unbounded_String := t;
+      is_constructor : Boolean := False;  -- Flag to check if it's a constructor
    begin
       Put_Line(File => curr_vm_file, Item => "<returnStatement>");
-      -- return
-      Put_Line(File => curr_vm_file, Item => "<keyword> return </keyword>");
-      -- expression
-      temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+      temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- Get next token
+   
+      -- Check if it's a constructor
+      is_constructor := (To_String(temp) = "<keyword> constructor </keyword>");
+   
+      -- Parse expression if present
       if To_String(temp) /= "<symbol> ; </symbol>" then
          temp := parse_expression(temp);
       end if;
-      -- end line - ; symbol:
-      Put_Line(File => curr_vm_file, Item => "<symbol> ; </symbol>");
+   
+      -- Handle return value
+      if is_constructor then
+         -- For constructors, push 'this' pointer
+         Put_Line(File => curr_vm_file, Item => "push pointer 0");
+      elsif To_String(temp) = "<symbol> ; </symbol>" and is_void then
+         -- For void functions (no expression), push 0
+         Put_Line(File => curr_vm_file, Item => "push constant 0");
+      end if;
+      Put_Line(File => curr_vm_file, Item => "return");
+      -- Note: If there was an expression, it's already pushed to the stack by parse_expression
+   
+      -- End of return statement
       Put_Line(File => curr_vm_file, Item => "</returnStatement>");
-      -- temp == NEXT token:
+   
+      -- Get next token (for the caller)
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       Put_Line(To_String(temp));
+   
       return temp;
    end parse_returnStatement;
    
@@ -707,7 +736,7 @@ package body Code_Generation is
          declare
             helper : Utils.String_Array := Utils.split_string(To_String(temp));
             result : Unbounded_String := To_Unbounded_String("");
-            curr_char : Character;
+            --  curr_char : Character;
             ascii_val : Integer := 0;
          begin
             --  helper := ;
@@ -752,18 +781,13 @@ package body Code_Generation is
             Put_Line(File => curr_vm_file, Item => "<symbol> ] </symbol>");
             -- subroutineCall -> subroutineName '(' expressionList ')' :
          elsif To_String(temp) = "<symbol> ( </symbol>" then
-            Put_Line(File => curr_vm_file, Item => To_String(temp));
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             temp := parse_expressionList(temp);
-            --  if To_String(temp) = "<symbol> ) </symbol>" then
-            --     temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             --# <symbol> ) </symbol>
             Put_Line(To_String(temp));
-            Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
-            --  end if;
+            --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
             -- subroutineCall -> (className | varName) '.' subroutineName '(' expressionList ')' :
          elsif To_String(temp) = "<symbol> . </symbol>" then
-            Put_Line(File => curr_vm_file, Item => To_String(temp));
             -- subroutineName:
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             --# <identifier> subroutineName </identifier>
@@ -772,18 +796,17 @@ package body Code_Generation is
             -- ( expressionList ):
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             Put_Line(To_String(temp));
-            Put_Line(File => curr_vm_file, Item => "<symbol> ( </symbol>");
+            --  Put_Line(File => curr_vm_file, Item => "<symbol> ( </symbol>");
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             temp := parse_expressionList(temp);
 
-            Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
+            --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
          else
             Put_Line(File => curr_vm_file, Item => "</term>");
             return temp;
          end if;
          -- '(' expression ')' :
       elsif To_String(temp) = "<symbol> ( </symbol>" then
-         Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- expression:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          temp := parse_expression(temp);
@@ -829,7 +852,7 @@ package body Code_Generation is
       -- subroutineCall -> subroutineName '(' expressionList ')' :
       if To_String(temp) = "<symbol> ( </symbol>" then -- not a built in method usually 
          result := To_Unbounded_String(To_String(curr_class_name) & "." & To_String(name)); -- className.subroutineName 
-         result := To_unbounded_String(To_String(result) & " " & SymbolTable.varCount(To_Unbounded_String("ARG")));
+         result := To_unbounded_String(To_String(result) & Integer'Image(SymbolTable.varCount(To_Unbounded_String("ARG"))));
 
          Put_Line(To_String(temp));
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -846,7 +869,7 @@ package body Code_Generation is
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          name := Utils.split_string(To_String(temp))(2); -- extracted subroutine name
          result := To_Unbounded_String(To_String(result) & "." & To_String(name));
-         result := To_unbounded_String(To_String(result) & " " & SymbolTable.varCount(To_Unbounded_String("ARG")));
+         result := To_unbounded_String(To_String(result) & " " & SymbolTable.varCount(To_Unbounded_String("ARG"))'Image);
          Put_Line(To_String(temp));
          -- ( expressionList ):
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));

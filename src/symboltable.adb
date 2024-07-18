@@ -23,7 +23,7 @@ package body SymbolTable is
    procedure Constructor (name: Unbounded_String) is
    begin
       Create(File => out_symbol_table_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & "_symbol_table.txt");
-      filename := To_String(name) & "_symbol_table.txt"; 
+      filename := To_Unbounded_String(To_String(name) & "_symbol_table.txt"); 
       Close(out_symbol_table_file);
    end Constructor;
 
@@ -38,8 +38,8 @@ package body SymbolTable is
       arg_ids := 0;
       --TODO: We may need to add loops that clear all the unwanted information from a method scope
       -- OR, we can add to the subroutine-scope and identify them all with the subroutine names . . . ?
-      Open(File => in_symbol_table_file, Mode => In_File, Name => filename);
-      temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));
+      temp_class := To_Unbounded_String(To_String(temp_class) & Get_Line(in_symbol_table));
       while not End_Of_File(in_symbol_table_file) and To_String(temp)(1..14) /= "</class-scope>"  loop
          temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
       end loop;
