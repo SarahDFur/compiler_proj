@@ -29,29 +29,29 @@ package body Utils is
       return -1;
    end find_char_index;
 
-   function split_string (str: String) return String_Array is
-      Arr : String_Array := (1..200=> To_Unbounded_String("")); --not size cost
-      counter : Natural := 1; -- For indexing the array elements
+    function split_string (str: String) return String_Array is
+      S : Unbounded_String := To_Unbounded_String(str);
+      Words : String_Array := String_Array_Pkg.Empty_Vector;
       Temp : Unbounded_String := To_Unbounded_String("");
-      S : Unbounded_String:=To_Unbounded_String(str);
-   begin 
-      for I in 1 .. Natural(Length(S)) loop
+   begin
+      for I in 1 .. Length(S) loop
          if Element(S, I) = ' ' then
-            -- Debug Print: Print the content of Temp
-            --  Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Temp));
-            Arr(counter) := Temp;
-           -- Ada.Text_IO.Put_Line("Content of Temp: " & To_String(Arr(counter)));
-            counter := counter + 1;
-            Temp := To_Unbounded_String("");
+            if Length(Temp) > 0 then
+               String_Array_Pkg.Append(Words, Temp);
+               Temp := To_Unbounded_String("");
+            end if;
          else
             Append(Temp, Element(S, I));
          end if;
-         if To_String(temp) /= "" then
-            Arr(counter) := Temp;
-         end if;
       end loop;
-      return Arr;
+
+      if Length(Temp) > 0 then
+         String_Array_Pkg.Append(Words, Temp);
+      end if;
+
+      return Words;
    end split_string;
+
 
    function Remove_Whitespace (Input_String : String) return Unbounded_String is
       Trimmed_String : Unbounded_String := To_Unbounded_String("");  -- Initialize empty string
