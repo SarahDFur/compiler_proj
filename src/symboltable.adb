@@ -17,6 +17,7 @@ package body SymbolTable is
    filename : Unbounded_String := To_Unbounded_String("");  -- Current files name - name of the class in our case
    static_ids : Integer := 0;
    field_ids : Integer := 0;
+     
    var_ids : Integer := 0;
    arg_ids : Integer := 0;
    --# Create a Symbol Table
@@ -30,6 +31,7 @@ package body SymbolTable is
    procedure startSubroutine is  -- will be called when we close a jack / xml file
       temp_class : Unbounded_String := To_Unbounded_String("");
       temp_method : Unbounded_String := To_Unbounded_String("");
+
    begin
       -- reset constant vars for next xxxT.xml file that we read
       static_ids := 0;
@@ -39,17 +41,20 @@ package body SymbolTable is
       --TODO: We may need to add loops that clear all the unwanted information from a method scope
       -- OR, we can add to the subroutine-scope and identify them all with the subroutine names . . . ?
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));
-      temp_class := To_Unbounded_String(To_String(temp_class) & Get_Line(in_symbol_table));
-      while not End_Of_File(in_symbol_table_file) and To_String(temp)(1..14) /= "</class-scope>"  loop
-         temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
+    --  temp_class := To_Unbounded_String(To_String(temp_class) & Get_Line(in_symbol_table));
+      while not End_Of_File(in_symbol_table_file) and To_String(temp_class)(1..14) /= "</class-scope>"  loop
+         --  temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+               Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
       end loop;
-      temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+            Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
+     -- temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
       --  while not End_Of_File(in_symbol_table_file) loop
       --     temp_method := To_Unbounded_String(To_String(temp_method) & Get_Line(in_symbol_table));
       --  end loop;
       Close(in_symbol_table_file);
-      Open(File => out_symbol_table_file, Mode => Out_File, Name => filename);
-      Put_Line(File => out_symbol_table_file, Item => temp_class);
+      Open(File => out_symbol_table_file, Mode => Out_File, Name => To_String(filename));
+      Put_Line(File => out_symbol_table_file, Item => To_String(temp_class));
       Close(out_symbol_table_file);
    end startSubroutine;
    
@@ -57,7 +62,7 @@ package body SymbolTable is
       index : Integer := 0;
       row : Unbounded_String := To_Unbounded_String("");
    begin
-      Open(File => out_symbol_table_file, Mode => Append_File, Name => filename);
+      Open(File => out_symbol_table_file, Mode => Append_File, Name => To_String(filename));
       if To_String(kind) = "STATIC" then
          index := static_ids;
          static_ids := static_ids + 1;
@@ -86,15 +91,18 @@ package body SymbolTable is
          return arg_ids;
       elsif To_String(kind) = "VAR" then
          return var_ids; 
+      else
+         --noa add for default
+         return 0; 
       end if;
    end varCount;
  
-   function kindOf (name: Unbounded_String) return Unbounded_String is
+ function kindOf (name: Unbounded_String) return Unbounded_String is
       kind_of : Unbounded_String := To_Unbounded_String("");
       ins : String_Array;  
    begin
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
-      while not End_Of_File(in_symbol_file) and index_of = 0 loop
+      while not End_Of_File(in_symbol_table_file)  loop
          ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
          if To_String(ins(1)) = name then
             kind_of := ins(3);
@@ -109,7 +117,7 @@ package body SymbolTable is
       ins : String_Array;  
    begin
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
-      while not End_Of_File(in_symbol_file) and index_of = 0 loop
+      while not End_Of_File(in_symbol_table_file)  loop
          ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
          if To_String(ins(1)) = name then
             type_of := ins(2);
@@ -124,7 +132,7 @@ package body SymbolTable is
       ins : String_Array;
    begin
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
-      while not End_Of_File(in_symbol_file) and index_of = 0 loop
+      while not End_Of_File(in_symbol_table_file) and index_of = 0 loop
          ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
          if To_String(ins(1)) = name then
             index_of := Utils.string_to_int(To_String(ins(4)));

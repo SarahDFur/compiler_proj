@@ -1,8 +1,9 @@
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
+with Ada.Strings.Unbounded; 
+use Ada.Strings.Unbounded;
 package SymbolTable is
-
-   type String_Array is array (Positive range <>) of Unbounded_String;
+   
+   --   
+   --type String_Array is array (Positive range <>) of Unbounded_String;
    
    procedure Constructor (name: Unbounded_String);
    procedure startSubroutine; 
