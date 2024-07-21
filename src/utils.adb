@@ -20,35 +20,35 @@ package body Utils is
       --  Put_Line(index'Image);
       --  Put_Line(Search_str);
       for Index in Search_str'Range loop
-            if Search_str(Index) = ch then
-                Put_Line("char at index:" & Index'Image );
-                Put_Line(Search_str(Search_str'First .. Index-1));
-                return Index;
-            end if;
+         if Search_str(Index) = ch then
+            Put_Line("char at index:" & Index'Image );
+            Put_Line(Search_str(Search_str'First .. Index-1));
+            return Index;
+         end if;
       end loop;
       return -1;
    end find_char_index;
-
-    function split_string (str: String) return String_Array is
+     
+   function split_string (str: String) return String_Array is
       S : Unbounded_String := To_Unbounded_String(str);
-      Words : String_Array := String_Array_Pkg.Empty_Vector;
+      Words : String_Array := String_Vector.Empty_Vector;
       Temp : Unbounded_String := To_Unbounded_String("");
    begin
       for I in 1 .. Length(S) loop
          if Element(S, I) = ' ' then
             if Length(Temp) > 0 then
-               String_Array_Pkg.Append(Words, Temp);
+               String_Vector.Append(Words, Temp);
                Temp := To_Unbounded_String("");
             end if;
          else
             Append(Temp, Element(S, I));
          end if;
       end loop;
-
+      
       if Length(Temp) > 0 then
-         String_Array_Pkg.Append(Words, Temp);
+         String_Vector.Append(Words, Temp);
       end if;
-
+      
       return Words;
    end split_string;
 
@@ -68,7 +68,7 @@ package body Utils is
             Append(Original_String, '_');
          end if;
       end loop;
-     -- Put_Line ("     Original string: " & To_String(Original_String));
+      -- Put_Line ("     Original string: " & To_String(Original_String));
       --Put_Line ("     Trimmed string: " & To_String(Trimmed_String));
       return Trimmed_String;
    end Remove_Whitespace;

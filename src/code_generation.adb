@@ -18,23 +18,26 @@ package body Code_Generation is
    begin
       -- 1.1. create file where filename = name & '.vm' for WRITING:
       sym_tbl_name := To_Unbounded_String(To_String(name) & "_symbol_table.txt");
-      xml_file_name := name & ".vm";
-      Create(File => curr_xml_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & ".vm");
+      xml_file_name := name & "T.xml";
+      Create(File => curr_vm_file, Mode => Out_File, Name => Current_Directory & '\' & To_String(name) & ".vm");
       Close(curr_vm_file);
       -- 1.2 & 1.3 will be closed at the end of this procedure !
       -- 1.2. open the 'T.xml' file for READING:
-      Open(File => curr_xml_file, Mode => In_File, Name => To_String(filename));
+      Open(File => curr_xml_file, Mode => In_File, Name => To_String(xml_file_name));
       -- 1.3. open xxx.vm for WRITING:
       Open(File => curr_vm_file, Mode => Out_File, Name => To_String(name) & ".vm");
 
       SymbolTable.Constructor(name); -- Create A SYMBOL TABLE for our current xml file
       Open(File => out_sym_tbl, Mode => Out_File, Name => To_String(name) & "_symbol_table.txt");
       Put_Line(File => out_sym_tbl, Item => "<class-scope>");
-
-      Put_Line(Get_Line(File => curr_xml_file)); -- <tokens>
-      parse_class;
-      Put_Line(Get_Line(File => curr_xml_file)); -- </tokens>
-      
+      Close(out_sym_tbl);
+      declare 
+         temp : Unbounded_String := To_unbounded_String("");
+      begin
+         temp := To_Unbounded_String(Get_Line(File => curr_xml_file)); -- <tokens>
+         parse_class;
+         temp := To_Unbounded_String(Get_Line(File => curr_xml_file)); -- </tokens>
+      end;
       -- End all execution:
       Close(curr_vm_file);
       Close(curr_xml_file);
@@ -50,18 +53,18 @@ package body Code_Generation is
       Put_Line(To_String(temp));
       if To_String(temp) = "<keyword> class </keyword>" then -- must conform to the following structure
          -- 1. 'class' keyword:
-         Put_Line(File => curr_vm_file, Item => To_String(temp));
+         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 2. Get Class NAME:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- will get the function name 
          curr_class_name := temp;
          --# <identifier> className </identifier>
          Put_Line(To_String(temp));
-         Put_Line(File => curr_vm_file, Item => To_String(temp));         
+         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 3. Open Class Definitions: '{' :
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          --# <symbol> { </symbol>
          Put_Line(To_String(temp));
-         Put_Line(File => curr_vm_file, Item => To_String(temp));
+         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 4. Call classVarDec :  For all fields that belong to the class:
 
          -- LOOP: needs to be in a loop:
@@ -87,9 +90,9 @@ package body Code_Generation is
          end loop;
         
          --# <symbol> } </symbol>  =>  end of class
-         if To_String(temp) = "<symbol> } </symbol>" then
-            Put_Line(File => curr_vm_file, Item => To_String(temp));
-         end if;
+         --  if To_String(temp) = "<symbol> } </symbol>" then
+         --     Put_Line(File => curr_vm_file, Item => To_String(temp));
+         --  end if;
          Put_Line(File => curr_vm_file, Item => "</class>");
       end if;
    end parse_class;
@@ -102,6 +105,7 @@ package body Code_Generation is
    begin  
       --# <keyword> static | field </keyword>  =>  printed to file 
       --  temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+      Open(File => out_sym_tbl, Mode => Out_File, Name => To_String(name) & "_symbol_table.txt");
       if To_String(temp) in "<keyword> static </keyword>" | "<keyword> field </keyword>" then
          Put_Line(File => curr_vm_file, Item => "<classVarDec>");
          -- field | static
@@ -165,6 +169,7 @@ package body Code_Generation is
       var_type : Unbounded_String := To_Unbounded_String("");
       kind : Unbounded_String := To_Unbounded_String("");
    begin   
+      Open(File => out_sym_file, Mode => Append_File, Name => To_String(sym_tbl_name));
 --# Loop over the next section - parameter list and local vars. Save all the information to first line of method scope:
       declare
          helper_str : Unbounded_String := To_Unbounded_String("");
@@ -279,9 +284,7 @@ package body Code_Generation is
          end loop;   
          func_info := func_info & count_locals'Image;
          
-         Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
          Put_Line(File => out_sym_tbl, Item => "<method-scope> " & To_String(func_info));
-         Close(out_sym_tbl);
          Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." 
                   & To_String(curr_func_name) & " " &  Integer'Image (count_locals) (2 .. count_locals'Image'Length));
          count_args := 0;
@@ -328,6 +331,7 @@ package body Code_Generation is
       --# <symbol> ( </symbol>
       Put_Line(To_String(temp));
       parse_parameterList;
+      Close(out_sym_tbl);
       -- ')' == when parameterList stops executing ! ! ! !
       -- temp in parse_parameterList == ')' at the end of the run:
       -- subroutineBody:
@@ -740,9 +744,13 @@ package body Code_Generation is
             ascii_val : Integer := 0;
          begin
             --  helper := ;
-            for i in helper'Range loop
-               if i /= helper'Length and i /= 1 then
-                  temp := To_Unbounded_String(To_String(temp) & To_String(helper(i)) & " ");
+            for i in 0 .. Natural(Utils.String_Vector.Length(helper)) - 1 loop
+               if i /= 0 and i /= Natural(Utils.String_Vector.Length(helper)) - 1 then
+                  temp := To_Unbounded_String(
+                                              To_String(temp) & 
+                                                To_String(Utils.String_Vector.Element(helper, i)) & 
+                                                " "
+                                             );
                end if;
             end loop;
             Put_Line(File => curr_vm_file, Item => "push constant" & To_String(t)'Length'Image);
@@ -789,7 +797,7 @@ package body Code_Generation is
                Put_Line(File => curr_vm_file, Item => "add");
                Put_Line(File => curr_vm_file, Item => "pop pointer 1");
                Put_Line(File => curr_vm_file, Item => "push that 0");
-               Put_L;ine(File => curr_vm_file, Item => "return");
+               Put_Line(File => curr_vm_file, Item => "return");
                -- subroutineCall -> subroutineName '(' expressionList ')' :
             elsif To_String(temp) = "<symbol> ( </symbol>" then
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
