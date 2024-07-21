@@ -766,45 +766,52 @@ package body Code_Generation is
          end if;
          -- varName:  OR  subroutineCall:
       elsif To_String(temp)(1..12) = "<identifier>" then
-         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
-         temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-         --# <symbol> [  |  (  |  . </symbol>
-         Put_Line(To_String(temp));
-         -- varName '[' expression ']':
-         if To_String(temp) = "<symbol> [ </symbol>" then
-            Put_Line(File => curr_vm_file, Item => To_String(temp));
+         declare
+            name : Unbounded_String := To_Unbounded_String("");
+            segment : Unbounded_String := To_Unbounded_String("");
+            var_type : Unbounded_String := To_Unbounded_String("");
+            id_num : Integer := 0;
+         begin
+            name := Utils.split_string(To_String(temp))(2); -- the ID (subroutine / varName / className)
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            temp := parse_expression(temp);
-            --  temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            --# <symbol> ] </symbol>
+            --# <symbol> [  |  (  |  . </symbol> 
             Put_Line(To_String(temp));
-            Put_Line(File => curr_vm_file, Item => "<symbol> ] </symbol>");
-            -- subroutineCall -> subroutineName '(' expressionList ')' :
-         elsif To_String(temp) = "<symbol> ( </symbol>" then
-            temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            temp := parse_expressionList(temp);
-            --# <symbol> ) </symbol>
-            Put_Line(To_String(temp));
-            --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
-            -- subroutineCall -> (className | varName) '.' subroutineName '(' expressionList ')' :
-         elsif To_String(temp) = "<symbol> . </symbol>" then
-            -- subroutineName:
-            temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            --# <identifier> subroutineName </identifier>
-            Put_Line(To_String(temp));
-            Put_Line(File => curr_vm_file, Item => To_String(temp));
-            -- ( expressionList ):
-            temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            Put_Line(To_String(temp));
-            --  Put_Line(File => curr_vm_file, Item => "<symbol> ( </symbol>");
-            temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            temp := parse_expressionList(temp);
+            -- varName '[' expression ']':
+            if To_String(temp) = "<symbol> [ </symbol>" then
+               var_type := SymbolTable.typeOf(name);
+               segment := SymbolTable.kindOf(name);
+               id_num := SymbolTable.indexOf(name);
 
-            --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
-         else
-            Put_Line(File => curr_vm_file, Item => "</term>");
-            return temp;
-         end if;
+               temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               temp := parse_expression(temp);
+               --# <symbol> ] </symbol>
+               Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & id_num'Image);
+               Put_Line(File => curr_vm_file, Item => "add");
+               Put_Line(File => curr_vm_file, Item => "pop pointer 1");
+               Put_Line(File => curr_vm_file, Item => "push that 0");
+               Put_L;ine(File => curr_vm_file, Item => "return");
+               -- subroutineCall -> subroutineName '(' expressionList ')' :
+            elsif To_String(temp) = "<symbol> ( </symbol>" then
+               temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               temp := parse_expressionList(temp);
+               --# <symbol> ) </symbol>
+               Put_Line(To_String(temp));
+               -- subroutineCall -> (className | varName) '.' subroutineName '(' expressionList ')' :
+            elsif To_String(temp) = "<symbol> . </symbol>" then
+               -- subroutineName:
+               temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               --# <identifier> subroutineName </identifier>
+               Put_Line(To_String(temp));
+               -- ( expressionList ):
+               temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               Put_Line(To_String(temp));
+               temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               temp := parse_expressionList(temp);
+            else
+               Put_Line(File => curr_vm_file, Item => "</term>");
+               return temp;
+            end if;
+         end;
          -- '(' expression ')' :
       elsif To_String(temp) = "<symbol> ( </symbol>" then
          -- expression:
