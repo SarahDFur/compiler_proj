@@ -53,18 +53,15 @@ package body Code_Generation is
       Put_Line(To_String(temp));
       if To_String(temp) = "<keyword> class </keyword>" then -- must conform to the following structure
          -- 1. 'class' keyword:
-         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 2. Get Class NAME:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- will get the function name 
          curr_class_name := temp;
          --# <identifier> className </identifier>
          Put_Line(To_String(temp));
-         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 3. Open Class Definitions: '{' :
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          --# <symbol> { </symbol>
          Put_Line(To_String(temp));
-         --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- 4. Call classVarDec :  For all fields that belong to the class:
 
          -- LOOP: needs to be in a loop:
@@ -82,8 +79,8 @@ package body Code_Generation is
          while To_String(temp) in "<keyword> constructor </keyword>" | "<keyword> function </keyword>"
            | "<keyword> method </keyword>" loop
             is_void := False;
-            SymbolTable.startSubroutine;
             parse_subroutineDec(temp);
+            SymbolTable.startSubroutine;
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             --# <keyword> function | constructor | method </keyword>  ||  <symbol> } </symbol>
             Put_Line(To_String(temp));
@@ -105,7 +102,7 @@ package body Code_Generation is
    begin  
       --# <keyword> static | field </keyword>  =>  printed to file 
       --  temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-      Open(File => out_sym_tbl, Mode => Out_File, Name => To_String(name) & "_symbol_table.txt");
+      Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
       if To_String(temp) in "<keyword> static </keyword>" | "<keyword> field </keyword>" then
          Put_Line(File => curr_vm_file, Item => "<classVarDec>");
          -- field | static
@@ -169,7 +166,7 @@ package body Code_Generation is
       var_type : Unbounded_String := To_Unbounded_String("");
       kind : Unbounded_String := To_Unbounded_String("");
    begin   
-      Open(File => out_sym_file, Mode => Append_File, Name => To_String(sym_tbl_name));
+      Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
 --# Loop over the next section - parameter list and local vars. Save all the information to first line of method scope:
       declare
          helper_str : Unbounded_String := To_Unbounded_String("");
@@ -301,6 +298,7 @@ package body Code_Generation is
             Put_Line(File => curr_vm_file, Item => "push argument 0");
             Put_Line(File => curr_vm_file, Item => "pop pointer 0");
          end if;
+         Close(curr_xml_file);
       end;
       
       Open(File => curr_xml_file, Mode => In_File, Name => To_String(xml_file_name));
