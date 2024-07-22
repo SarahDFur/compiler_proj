@@ -27,6 +27,7 @@ package Code_Generation is
    stop_line : Integer := 0;
    xml_file_name : Unbounded_String := To_unbounded_String("");
    is_void : Boolean := False;
+   func_type : Unbounded_String := To_Unbounded_String("");
    type String_Array is array (Positive range <>) of Unbounded_String;
 
    procedure init_analyzer (filename: Unbounded_String);
