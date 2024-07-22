@@ -59,7 +59,7 @@ package body Code_Generation is
          -- 2. Get Class NAME:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- will get the function name 
          stop_line := stop_line + 1;
-         curr_class_name := temp;
+         curr_class_name := Utils.split_string(To_String(temp))(2);
          --# <identifier> className </identifier>
          Put_Line(To_String(temp));
          -- 3. Open Class Definitions: '{' :
@@ -456,7 +456,7 @@ package body Code_Generation is
       var_type : Unbounded_String := To_Unbounded_String("");
       kind : Unbounded_String := To_Unbounded_String("");
    begin
-      Put_Line(File => curr_vm_file, Item => "<varDec>");
+      --  Put_Line(File => curr_vm_file, Item => "<varDec>");
       -- type:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
@@ -491,7 +491,7 @@ package body Code_Generation is
       end loop;
       -- last temp will be equal to ';' : 
       --  Put_Line(File => curr_vm_file, Item => "<symbol> ; </symbol>");
-      Put_Line(File => curr_vm_file, Item => "</varDec>");
+      --  Put_Line(File => curr_vm_file, Item => "</varDec>");
    end parse_varDec;
    
    --# STATEMENTS:
@@ -548,7 +548,7 @@ package body Code_Generation is
       -- varName:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
-      varName := temp;
+      varName := Utils.split_string(To_String(temp))(2);
       --# <identifier> varName </identifier>
       Put_Line(To_String(temp));
       

@@ -99,13 +99,17 @@ package body SymbolTable is
  
  function kindOf (name: Unbounded_String) return Unbounded_String is
       kind_of : Unbounded_String := To_Unbounded_String("");
+      temp : Unbounded_String := To_unbounded_String("");
       ins : String_Array;  
    begin
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file)  loop
-         ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
-         if To_String(ins(1)) = name then
-            kind_of := ins(3);
+         temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+            ins := Utils.split_string(To_String(temp));
+            if To_String(ins(1)) = name then
+               kind_of := ins(3);
+            end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
@@ -114,13 +118,17 @@ package body SymbolTable is
    
    function typeOf (name: Unbounded_String) return Unbounded_String is
       type_of : Unbounded_String := To_Unbounded_String("");
+      temp : Unbounded_String := To_Unbounded_String("");
       ins : String_Array;  
    begin
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file)  loop
-         ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
-         if To_String(ins(1)) = name then
-            type_of := ins(2);
+         temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+            ins := Utils.split_string(To_String(temp));
+            if To_String(ins(1)) = name then
+               type_of := ins(2);
+            end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
@@ -129,13 +137,17 @@ package body SymbolTable is
    
    function indexOf (name: Unbounded_String) return Integer is
       index_of : Integer := 0;
+      temp : Unbounded_String := To_Unbounded_String("");
       ins : String_Array;
    begin
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file) and index_of = 0 loop
-         ins := Utils.split_string(Get_Line(File => in_symbol_table_file));
-         if To_String(ins(1)) = name then
-            index_of := Utils.string_to_int(To_String(ins(4)));
+         temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+            ins := Utils.split_string(To_String(temp));
+            if To_String(ins(1)) = name then
+               index_of := Utils.string_to_int(To_String(ins(4)));
+            end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
