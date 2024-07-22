@@ -374,7 +374,7 @@ package body Code_Generation is
          -- varNsme:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
-         var_name := temp;
+         var_name := Utils.split_string(To_String(temp))(1);
          --# <identifier> varName </identifier>
          SymbolTable.define(var_name, var_type, To_Unbounded_String("ARG"));
 
@@ -393,7 +393,7 @@ package body Code_Generation is
             -- varName:
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- will end when this equals to '{'
             stop_line := stop_line + 1;
-            var_name := temp;
+            var_name := Utils.split_string(To_String(temp))(1);
             --# <identifier> varName </identifier>
             SymbolTable.define(var_name, var_type, To_Unbounded_String("ARG"));
 
