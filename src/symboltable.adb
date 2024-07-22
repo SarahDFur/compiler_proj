@@ -105,7 +105,8 @@ package body SymbolTable is
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file)  loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
             if To_String(ins(1)) = name then
                kind_of := ins(3);
@@ -124,7 +125,8 @@ package body SymbolTable is
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file)  loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
             if To_String(ins(1)) = name then
                type_of := ins(2);
@@ -143,7 +145,8 @@ package body SymbolTable is
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file) and index_of = 0 loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..14) /= "<method-scope>" then
+         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
             if To_String(ins(1)) = name then
                index_of := Utils.string_to_int(To_String(ins(4)));

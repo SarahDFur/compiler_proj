@@ -81,6 +81,9 @@ package body Code_Generation is
             stop_line := stop_line + 1;
             --#  <keyword> static | field </keyword>  ||  <keyword> function | constructor | method </keyword>
          end loop;
+         Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
+         Put_Line(File => out_sym_tbl, Item => "</class-scope>");
+         Close(out_sym_tbl);
          -- 5. call subroutines : 
          --# <keyword> function | constructor | method </keyword>
          while To_String(temp) in "<keyword> constructor </keyword>" | "<keyword> function </keyword>"
@@ -110,7 +113,7 @@ package body Code_Generation is
    begin  
       --# <keyword> static | field </keyword>  =>  printed to file 
       --  temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-      Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
+      --  Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
       if To_String(temp) in "<keyword> static </keyword>" | "<keyword> field </keyword>" then
          Put_Line(File => curr_vm_file, Item => "<classVarDec>");
          -- field | static
@@ -156,8 +159,8 @@ package body Code_Generation is
          Put_Line(File => curr_vm_file, Item => To_String(temp));
       end if;
       -- End of class-scope:
-      Put_Line(File => out_sym_tbl, Item => "</class-scope>"); 
-      Close(out_sym_tbl);
+      --  Put_Line(File => out_sym_tbl, Item => "</class-scope>");
+      --  Close(out_sym_tbl);
    end parse_classVarDec;
 
    function parse_type (t: Unbounded_String) return Unbounded_String is
