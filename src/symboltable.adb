@@ -43,9 +43,10 @@ package body SymbolTable is
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));
       Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
     --  temp_class := To_Unbounded_String(To_String(temp_class) & Get_Line(in_symbol_table));
-      while not End_Of_File(in_symbol_table_file) and To_String(temp_class)(1..14) /= "</class-scope>"  loop
+      while not End_Of_File(in_symbol_table_file) loop
          --  temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
-               Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
+         exit when To_String(temp_class) = "</class-scope>";
+         Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
       end loop;
             Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
      -- temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
@@ -105,12 +106,23 @@ package body SymbolTable is
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file) loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
-           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+         if To_String(temp)'Length >= 13 then
+            if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+              and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+               ins := Utils.split_string(To_String(temp));
+               Put_Line(Item => "element name: " & To_String(ins(0)));
+               Put_Line(Item => "element kind: " & To_String(ins(2)));
+               if ins(0) = name then
+                  kind_of := ins(2);
+               end if;
+            end if;
+            null;
+         else 
             ins := Utils.split_string(To_String(temp));
-            if Utils.String_Vector.Element(ins, 0) = name then
-               kind_of := To_String(Utils.String_Vector.Element(ins, 2));
-               null;
+            Put_Line(Item => "element name: " & To_String(ins(0)));
+            Put_Line(Item => "element kind: " & To_String(ins(2)));
+            if ins(0) = name then
+               kind_of := ins(2);
             end if;
          end if;
       end loop;
@@ -126,12 +138,24 @@ package body SymbolTable is
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file)  loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
-           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+         if To_String(temp)'Length >= 13 then
+            if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+              and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+               ins := Utils.split_string(To_String(temp));
+               Put_Line(Item => "element name: " & To_String(ins(0)));
+               Put_Line(Item => "element type: " & To_String(ins(1)));
+               if ins(0) = name then
+                  type_of := ins(1);
+               end if;
+            end if;
+            null;
+         else 
             ins := Utils.split_string(To_String(temp));
-            --  if To_String(ins.elements.ea(0)) = name then
-            --     type_of := ins.elements.ea(1);
-            --  end if;
+            Put_Line(Item => "element name: " & To_String(ins(0)));
+            Put_Line(Item => "element type: " & To_String(ins(1)));
+            if ins(0) = name then
+               type_of := ins(1);
+            end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
@@ -146,12 +170,24 @@ package body SymbolTable is
       Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
       while not End_Of_File(in_symbol_table_file) and index_of = 0 loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
-         if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
-           and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+         if To_String(temp)'Length >= 13 then
+            if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
+              and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
+               ins := Utils.split_string(To_String(temp));
+               Put_Line(Item => "element name: " & To_String(ins(0)));
+               Put_Line(Item => "element index: " & To_String(ins(3)));
+               if ins(0) = name then
+                  index_of := Utils.string_to_int(To_String(ins(3)));
+               end if;
+            end if;
+            null;
+         else 
             ins := Utils.split_string(To_String(temp));
-            --  if To_String(ins.elements.ea(0)) = name then
-            --     index_of := Utils.string_to_int(To_String(ins.elements.ea(3)));
-            --  end if;
+            Put_Line(Item => "element name: " & To_String(ins(0)));
+            Put_Line(Item => "element kind: " & To_String(ins(3)));
+            if ins(0) = name then
+               index_of := Utils.string_to_int(To_String(ins(3)));
+            end if;
          end if;
       end loop;
       Close(in_symbol_table_file);

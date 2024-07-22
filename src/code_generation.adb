@@ -48,7 +48,7 @@ package body Code_Generation is
    procedure parse_class is
       temp : Unbounded_String := To_Unbounded_String("");
    begin
-      Put_Line(File => curr_vm_file, Item => "<class>"); -- Wrapper Tag
+      --  Put_Line(File => curr_vm_file, Item => "<class>"); -- Wrapper Tag
       --  while not End_Of_File(curr_xml_file) loop
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file)); -- Get first line (is keyword - class)  
       stop_line := stop_line + 1;
@@ -101,7 +101,7 @@ package body Code_Generation is
          --  if To_String(temp) = "<symbol> } </symbol>" then
          --     Put_Line(File => curr_vm_file, Item => To_String(temp));
          --  end if;
-         Put_Line(File => curr_vm_file, Item => "</class>");
+         --  Put_Line(File => curr_vm_file, Item => "</class>");
       end if;
    end parse_class;
    
@@ -154,7 +154,7 @@ package body Code_Generation is
             Put_Line("end of classVarDec: " & To_String(temp));
             --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          end if;
-         Put_Line(File => curr_vm_file, Item => "</classVarDec>");
+         --  Put_Line(File => curr_vm_file, Item => "</classVarDec>");
       else
          Put_Line(File => curr_vm_file, Item => To_String(temp));
       end if;
@@ -353,7 +353,7 @@ package body Code_Generation is
       -- subroutineBody:
       parse_subroutineBody;
       --  end if;
-      Put_Line(File => curr_vm_file, Item => "</subroutineDec>");
+      --  Put_Line(File => curr_vm_file, Item => "</subroutineDec>");
       null;
    end parse_subroutineDec;
    
@@ -363,7 +363,7 @@ package body Code_Generation is
       var_type : Unbounded_String := To_Unbounded_String("");
       kind : Unbounded_String := To_Unbounded_String("");
    begin
-      Put_Line(File => curr_vm_file, Item => "<parameterList>");
+      --  Put_Line(File => curr_vm_file, Item => "<parameterList>");
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       --# parse_type  ||  <symbol> ) </symbol>
@@ -401,14 +401,14 @@ package body Code_Generation is
             stop_line := stop_line + 1;
          end loop;
       end if;
-      Put_Line(File => curr_vm_file, Item => "</parameterList>");
+      --  Put_Line(File => curr_vm_file, Item => "</parameterList>");
       null;
    end parse_parameterList;
    
    procedure parse_subroutineBody is
       temp : Unbounded_String := To_Unbounded_String("");
    begin
-      Put_Line(File => curr_vm_file, Item => "<subroutineBody>");
+      --  Put_Line(File => curr_vm_file, Item => "<subroutineBody>");
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       --# <symbol> { </symbol>
@@ -450,7 +450,7 @@ package body Code_Generation is
       -- send temp to the procedure so that we can check which type of statement it is
       temp := parse_statements(temp);
       --  stop_line := stop_line + 1;
-      Put_Line(File => curr_vm_file, Item => "</subroutineBody>");
+      --  Put_Line(File => curr_vm_file, Item => "</subroutineBody>");
    end parse_subroutineBody;
    
    procedure parse_varDec is
@@ -501,7 +501,7 @@ package body Code_Generation is
    function parse_statements (t: Unbounded_String) return Unbounded_String is
       temp : Unbounded_String := t;
    begin
-      Put_Line(File => curr_vm_file, Item => "<statements>");
+      --  Put_Line(File => curr_vm_file, Item => "<statements>");
       while To_String(temp) /= "<symbol> } </symbol>" loop
          -- breakdown the statement
          -- statement procedure will return the first token in the next statement
@@ -510,7 +510,7 @@ package body Code_Generation is
       end loop;
       --  Put_Line(File => curr_vm_file, Item => "<symbol> } <symbol>");
       -- ^ happens in the above level
-      Put_Line(File => curr_vm_file, Item => "</statements>");
+      --  Put_Line(File => curr_vm_file, Item => "</statements>");
       return temp;
    end parse_statements;
    
@@ -546,7 +546,7 @@ package body Code_Generation is
       segment : Unbounded_String := To_Unbounded_String("");
       index_of : Integer;
    begin
-      Put_Line(File => curr_vm_file, Item => "<letStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "<letStatement>");
       -- let keyword:
       -- varName:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -586,7 +586,7 @@ package body Code_Generation is
       -- Final commands:
       Put_Line(File => curr_vm_file, Item => "pop " & To_String(segment) & " " & Integer'Image (index_of) (2 .. index_of'Image'Length));
       Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & " " &  Integer'Image (index_of) (2 .. index_of'Image'Length));
-      Put_Line(File => curr_vm_file, Item => "</letStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "</letStatement>");
       -- temp == NEXT token:
       -- so that we can check if the next token in '}' 
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -598,7 +598,7 @@ package body Code_Generation is
    function parse_ifStatement (t: Unbounded_String) return Unbounded_String is 
       temp : Unbounded_String := t;
    begin
-      Put_Line(File => curr_vm_file, Item => "<ifStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "<ifStatement>");
       -- if keyword:
       -- '(' :
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -644,7 +644,7 @@ package body Code_Generation is
          Put_Line(To_String(temp));
          --  Put_Line(File => curr_vm_file, Item => "<symbol> } </symbol>");
       else
-         Put_Line(File => curr_vm_file, Item => "</ifStatement>");
+         --  Put_Line(File => curr_vm_file, Item => "</ifStatement>");
          return temp;
       end if;
       Put_Line(File => curr_vm_file, Item => "label IF_END" & Integer'Image (count_if) (2 .. count_if'Image'Length));
@@ -653,14 +653,14 @@ package body Code_Generation is
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       Put_Line(To_String(temp));
-      Put_Line(File => curr_vm_file, Item => "</ifStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "</ifStatement>");
       return temp;
    end parse_ifStatement;
    
    function parse_whileStatement (t: Unbounded_String) return Unbounded_String is
       temp : Unbounded_String := t;
    begin
-      Put_Line(File => curr_vm_file, Item => "<whileStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "<whileStatement>");
       -- while keyword:
       Put_Line(File => curr_vm_file, Item => "label WHILE_EXP" & Integer'Image (count_before_while) (2 .. count_before_while'Image'Length));
       -- '(' expression ')' :
@@ -689,7 +689,7 @@ package body Code_Generation is
       Put_Line(File => curr_vm_file, Item => "goto WHILE_EXP" & Integer'Image (count_before_while) (2 .. count_before_while'Image'Length));
       Put_Line(File => curr_vm_file, Item => "label WHILE_END" & Integer'Image (count_before_while) (2 .. count_before_while'Image'Length));
 
-      Put_Line(File => curr_vm_file, Item => "</whileStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "</whileStatement>");
 
       -- temp == NEXT token:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -701,7 +701,7 @@ package body Code_Generation is
    function parse_doStatement (t: Unbounded_String) return Unbounded_String is
       temp: Unbounded_String := t;
    begin
-      Put_Line(File => curr_vm_file, Item => "<doStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "<doStatement>");
 
       --  Put_Line(File => curr_vm_file, Item => "<keyword> do </keyword>");
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -711,7 +711,7 @@ package body Code_Generation is
       Put_Line(To_String(temp));
       --  Put_Line(File => curr_vm_file, Item => "<symbol> ; </symbol>");
 
-      Put_Line(File => curr_vm_file, Item => "</doStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "</doStatement>");
       Put_Line(File => curr_vm_file, Item => "pop temp 0");
 
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file)); -- for wrapping level to know if it can exit
@@ -724,7 +724,7 @@ package body Code_Generation is
       temp : Unbounded_String := t;
       is_constructor : Boolean := False;  -- Flag to check if it's a constructor
    begin
-      Put_Line(File => curr_vm_file, Item => "<returnStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "<returnStatement>");
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- Get next token
       stop_line := stop_line + 1;
 
@@ -748,7 +748,7 @@ package body Code_Generation is
       -- Note: If there was an expression, it's already pushed to the stack by parse_expression
    
       -- End of return statement
-      Put_Line(File => curr_vm_file, Item => "</returnStatement>");
+      --  Put_Line(File => curr_vm_file, Item => "</returnStatement>");
    
       -- Get next token (for the caller)
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -763,7 +763,7 @@ package body Code_Generation is
       temp : Unbounded_String := t;
       op : Unbounded_String := To_Unbounded_String("");
    begin
-      Put_Line(File => curr_vm_file, Item => "<expression>");
+      --  Put_Line(File => curr_vm_file, Item => "<expression>");
       --# first line in term
       temp := parse_term(temp);
 
@@ -778,14 +778,14 @@ package body Code_Generation is
          Put_Line(File => curr_vm_file, Item => To_String(convert_expression_ops(op)));
          Put_Line(To_String(temp));
       end loop;
-      Put_Line(File => curr_vm_file, Item => "</expression>");
+      --  Put_Line(File => curr_vm_file, Item => "</expression>");
       return temp;
    end parse_expression;
    
    function parse_term (t: Unbounded_String  := To_Unbounded_String("")) return Unbounded_String is
       temp : Unbounded_String := t;
    begin
-      Put_Line(File => curr_vm_file, Item => "<term>");
+      --  Put_Line(File => curr_vm_file, Item => "<term>");
       -- integerConstant:
       if To_String(temp)(1..17) = "<integerConstant>" then
          temp := Utils.split_string(To_String(temp))(1);
@@ -803,7 +803,7 @@ package body Code_Generation is
                if i /= 0 and i /= Natural(Utils.String_Vector.Length(helper)) - 1 then
                   temp := To_Unbounded_String(
                                               To_String(temp) & 
-                                                To_String(Utils.String_Vector.Element(helper, i)) & 
+                                                To_String(helper(i)) &  --Utils.String_Vector.Element(helper, i)) & 
                                                 " "
                                              );
                end if;
@@ -876,7 +876,7 @@ package body Code_Generation is
                stop_line := stop_line + 1;
                temp := parse_expressionList(temp);
             else
-               Put_Line(File => curr_vm_file, Item => "</term>");
+               --  Put_Line(File => curr_vm_file, Item => "</term>");
                return temp;
             end if;
          end;
@@ -902,13 +902,13 @@ package body Code_Generation is
                Put_Line(File => curr_vm_file,  Item => "not");
             end if;
             Put_Line(To_String(temp));
-            Put_Line(File => curr_vm_file, Item => "</term>");
+            --  Put_Line(File => curr_vm_file, Item => "</term>");
             return temp; 
          end;
       else -- any other op
          return temp;
       end if;
-      Put_Line(File => curr_vm_file, Item => "</term>");
+      --  Put_Line(File => curr_vm_file, Item => "</term>");
       -- Get Next Line - right after the term ! :
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
@@ -974,7 +974,7 @@ package body Code_Generation is
       var_type : Unbounded_String;
 
    begin
-      Put_Line(File => curr_vm_file, Item => "<expressionList>");
+      --  Put_Line(File => curr_vm_file, Item => "<expressionList>");
       if To_String(temp) /= "<symbol> ) </symbol>" then
          temp := parse_expression(temp);
          Put_Line(To_String(temp));
@@ -987,7 +987,7 @@ package body Code_Generation is
          end loop;
       end if;
 
-      Put_Line(File => curr_vm_file, Item => "</expressionList>");
+      --  Put_Line(File => curr_vm_file, Item => "</expressionList>");
       return temp;
    end parse_expressionList;
 

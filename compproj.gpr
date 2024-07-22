@@ -5,7 +5,7 @@ project Compproj is
    for Main use ("code_genreation_main.adb", "analyzer_main.adb", "main.adb", "tokenizer_main.adb");
 
    package Compiler is
-      for Switches ("ada") use ("-gnat2020", "-g");
+      for Switches ("ada") use ("-gnat2020", "-g", "-gnatf");
    end Compiler;
 
    package Linker is
