@@ -346,8 +346,9 @@ package body Code_Generation is
       stop_line := stop_line + 1;
       --# <symbol> ( </symbol>
       Put_Line(To_String(temp));
-      parse_parameterList;
       Close(out_sym_tbl);
+      parse_parameterList;
+      
       -- ')' == when parameterList stops executing ! ! ! !
       -- temp in parse_parameterList == ')' at the end of the run:
       -- subroutineBody:
@@ -878,6 +879,7 @@ package body Code_Generation is
             elsif To_String(temp) = "<symbol> . </symbol>" then
                -- subroutineName:
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               stop_line := stop_line + 1;
                subroutineName := Utils.split_string(To_String(temp))(1);
                --# <identifier> subroutineName </identifier>
                Put_Line(To_String(temp));
