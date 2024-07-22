@@ -59,7 +59,7 @@ package body Code_Generation is
          -- 2. Get Class NAME:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));  -- will get the function name 
          stop_line := stop_line + 1;
-         curr_class_name := Utils.split_string(To_String(temp))(2);
+         curr_class_name := Utils.split_string(To_String(temp))(1);
          --# <identifier> className </identifier>
          Put_Line(To_String(temp));
          -- 3. Open Class Definitions: '{' :
@@ -125,7 +125,7 @@ package body Code_Generation is
          stop_line := stop_line + 1;
          --# <identifer> varName </identifer>
          Put_Line(To_String(temp));
-         var_name := Utils.split_string(To_String(temp))(2);
+         var_name := Utils.split_string(To_String(temp))(1);
          -- <symbol> tag == ','
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
@@ -137,7 +137,7 @@ package body Code_Generation is
             -- NEXT <identifier> tag [ another field in the same line ]
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             stop_line := stop_line + 1;
-            var_name := Utils.split_string(To_String(temp))(2);
+            var_name := Utils.split_string(To_String(temp))(1);
             --# <identifer> varName </identifer>
             Put_Line(To_String(temp));
             SymbolTable.define(var_name, var_type, kind);
@@ -170,7 +170,7 @@ package body Code_Generation is
          --# || <identifer> className </identifer> 
          Put_Line(To_String(temp));
       end if;
-      return Utils.split_string(To_String(temp))(2);  -- return the actual type
+      return Utils.split_string(To_String(temp))(1);  -- return the actual type
    end parse_type;
    
    procedure parse_subroutineDec (t: Unbounded_String) is
@@ -207,7 +207,7 @@ package body Code_Generation is
          end if;
          -- subroutineName:
          helper_str := To_Unbounded_String(Get_Line(File => curr_xml_file));
-         curr_func_name := Utils.split_string(To_String(helper_str))(2);
+         curr_func_name := Utils.split_string(To_String(helper_str))(1);
          func_info := func_info & curr_class_name & "." & To_String(curr_func_name);
          --# <identifier> subroutineName </identifier>
          Put_Line(To_String(helper_str));
@@ -466,7 +466,7 @@ package body Code_Generation is
       -- varName:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
-      var_name := temp;
+      var_name := Utils.split_string(To_String(temp))(1);
       --# <identifier> varName </identifier>
       SymbolTable.define(var_name, var_type, To_Unbounded_String("VAR"));
       Put_Line(To_String(temp));
@@ -479,7 +479,7 @@ package body Code_Generation is
          -- varName:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
-         var_name := temp;
+         var_name := Utils.split_string(To_String(temp))(1);
          --# <identifier> varName </identifier>
          Put_Line(To_String(temp));
          SymbolTable.define(var_name, var_type, To_Unbounded_String("VAR"));
@@ -548,7 +548,7 @@ package body Code_Generation is
       -- varName:
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
-      varName := Utils.split_string(To_String(temp))(2);
+      varName := Utils.split_string(To_String(temp))(1);
       --# <identifier> varName </identifier>
       Put_Line(To_String(temp));
       
@@ -767,7 +767,7 @@ package body Code_Generation is
       while To_String(temp) in "<symbol> + </symbol>" | "<symbol> - </symbol>" | "<symbol> * </symbol>"
         | "<symbol> / </symbol>" | "<symbol> &amp; </symbol>" | "<symbol> | </symbol>" | "<symbol> &lt; </symbol>" 
           | "<symbol> &gt; </symbol>" | "<symbol> = </symbol>" loop
-         op := Utils.split_string(To_String(temp))(2); 
+         op := Utils.split_string(To_String(temp))(1); 
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
          Put_Line(To_String(temp));
@@ -785,7 +785,7 @@ package body Code_Generation is
       Put_Line(File => curr_vm_file, Item => "<term>");
       -- integerConstant:
       if To_String(temp)(1..17) = "<integerConstant>" then
-         temp := Utils.split_string(To_String(temp))(2);
+         temp := Utils.split_string(To_String(temp))(1);
          Put_Line(File => curr_vm_file, Item => "push constant " & To_String(temp));
          -- stringConstant:
       elsif To_String(temp)(1..16) = "<stringConstant>" then
@@ -832,7 +832,7 @@ package body Code_Generation is
             var_type : Unbounded_String := To_Unbounded_String("");
             id_num : Integer := 0;
          begin
-            name := Utils.split_string(To_String(temp))(2); -- the ID (subroutine / varName / className)
+            name := Utils.split_string(To_String(temp))(1); -- the ID (subroutine / varName / className)
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             stop_line := stop_line + 1;
             --# <symbol> [  |  (  |  . </symbol> 
@@ -887,7 +887,7 @@ package body Code_Generation is
          --  return temp;
       elsif To_String(temp) in "<symbol> - </symbol>" | "<symbol> ~ </symbol>" then
          declare
-            op : Unbounded_String := Utils.split_string(To_String(temp))(2);
+            op : Unbounded_String := Utils.split_string(To_String(temp))(1);
          begin
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
             stop_line := stop_line + 1;
@@ -919,7 +919,7 @@ package body Code_Generation is
       result : Unbounded_String := To_Unbounded_String("");
    begin
       -- subroutineName | className | varName:
-      name := Utils.split_string(To_String(temp))(2); -- the name
+      name := Utils.split_string(To_String(temp))(1); -- the name
       Put_Line(To_String(temp));
 
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -945,7 +945,7 @@ package body Code_Generation is
          -- subroutineName:
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
-         name := Utils.split_string(To_String(temp))(2); -- extracted subroutine name
+         name := Utils.split_string(To_String(temp))(1); -- extracted subroutine name
          result := To_Unbounded_String(To_String(result) & "." & To_String(name));
          result := To_unbounded_String(To_String(result) & " " & SymbolTable.varCount(To_Unbounded_String("ARG"))'Image);
          Put_Line(To_String(temp));
