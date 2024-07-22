@@ -103,13 +103,14 @@ package body SymbolTable is
       ins : String_Array;  
    begin
        Open(File => in_symbol_table_file, Mode => In_File, Name => To_String(filename));   
-      while not End_Of_File(in_symbol_table_file)  loop
+      while not End_Of_File(in_symbol_table_file) loop
          temp := To_Unbounded_String(Get_Line(File => in_symbol_table_file));
          if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
            and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
-            if To_String(ins(1)) = name then
-               kind_of := ins(3);
+            if Utils.String_Vector.Element(ins, 0) = name then
+               kind_of := To_String(Utils.String_Vector.Element(ins, 2));
+               null;
             end if;
          end if;
       end loop;
@@ -128,9 +129,9 @@ package body SymbolTable is
          if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
            and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
-            if To_String(ins(1)) = name then
-               type_of := ins(2);
-            end if;
+            --  if To_String(ins.elements.ea(0)) = name then
+            --     type_of := ins.elements.ea(1);
+            --  end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
@@ -148,9 +149,9 @@ package body SymbolTable is
          if To_String(temp)(1..13) /= "<class-scope>" and To_String(temp)(1..13) /= "</class-scope" 
            and To_String(temp)(1..13) /= "<method-scope" and To_String(temp)(1..13) /= "</method-scop" then
             ins := Utils.split_string(To_String(temp));
-            if To_String(ins(1)) = name then
-               index_of := Utils.string_to_int(To_String(ins(4)));
-            end if;
+            --  if To_String(ins.elements.ea(0)) = name then
+            --     index_of := Utils.string_to_int(To_String(ins.elements.ea(3)));
+            --  end if;
          end if;
       end loop;
       Close(in_symbol_table_file);
