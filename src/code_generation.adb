@@ -631,7 +631,7 @@ package body Code_Generation is
       stop_line := stop_line + 1;
       Put_Line(To_String(temp));
       temp := parse_statements(temp);
-      Put_Line(File => curr_vm_file, Item => "goto IF_END" & Integer'Image (count_if) (2 .. count_if'Image'Length));
+      --  Put_Line(File => curr_vm_file, Item => "goto IF_END" & Integer'Image (count_if) (2 .. count_if'Image'Length));
       Put_Line(File => curr_vm_file, Item => "label IF_FALSE" & Integer'Image (count_if) (2 .. count_if'Image'Length));
       -- else || next line ? :
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
