@@ -606,6 +606,7 @@ package body Code_Generation is
    
    function parse_ifStatement (t: Unbounded_String) return Unbounded_String is 
       temp : Unbounded_String := t;
+      if_count : Integer := count_if;
    begin
       --  Put_Line(File => curr_vm_file, Item => "<ifStatement>");
       -- if keyword:
@@ -617,9 +618,9 @@ package body Code_Generation is
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       temp := parse_expression(temp);      
-      Put_Line(File => curr_vm_file, Item => "if-goto IF_TRUE" & Integer'Image (count_if) (2 .. count_if'Image'Length));
-      Put_Line(File => curr_vm_file, Item => "goto IF_FALSE" & Integer'Image (count_if) (2 .. count_if'Image'Length));
-      Put_Line(File => curr_vm_file, Item => "label IF_TRUE" & Integer'Image (count_if) (2 .. count_if'Image'Length));
+      Put_Line(File => curr_vm_file, Item => "if-goto IF_TRUE" & Integer'Image (if_count) (2 .. if_count'Image'Length));
+      Put_Line(File => curr_vm_file, Item => "goto IF_FALSE" & Integer'Image (if_count) (2 .. if_count'Image'Length));
+      Put_Line(File => curr_vm_file, Item => "label IF_TRUE" & Integer'Image (if_count) (2 .. if_count'Image'Length));
       --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
       -- { :
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -630,17 +631,21 @@ package body Code_Generation is
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       Put_Line(To_String(temp));
+      count_if := count_if + 1;
       temp := parse_statements(temp);
-      --  Put_Line(File => curr_vm_file, Item => "goto IF_END" & Integer'Image (count_if) (2 .. count_if'Image'Length));
-      Put_Line(File => curr_vm_file, Item => "label IF_FALSE" & Integer'Image (count_if) (2 .. count_if'Image'Length));
+      
+      --  Put_Line(File => curr_vm_file, Item => "goto IF_END" & Integer'Image (if_count) (2 .. if_count'Image'Length));
+      Put_Line(File => curr_vm_file, Item => "label IF_FALSE" & Integer'Image (if_count) (2 .. if_count'Image'Length));
       -- else || next line ? :
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
       Put_Line(To_String(temp));
+      
       if To_String(temp) = "<keyword> else </keyword>" then
          -- else keyword:
          --  Put_Line(File => curr_vm_file, Item => To_String(temp));
          -- statements:
+         Put_Line(File => curr_vm_file, Item => "goto IF_END" & Integer'Image (if_count) (2 .. if_count'Image'Length));
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
          Put_Line(To_String(temp));
@@ -656,8 +661,8 @@ package body Code_Generation is
          --  Put_Line(File => curr_vm_file, Item => "</ifStatement>");
          return temp;
       end if;
-      Put_Line(File => curr_vm_file, Item => "label IF_END" & Integer'Image (count_if) (2 .. count_if'Image'Length));
-      count_if := count_if + 1;
+      Put_Line(File => curr_vm_file, Item => "label IF_END" & Integer'Image (if_count) (2 .. if_count'Image'Length));
+      --  count_if := count_if + 1;
 
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
