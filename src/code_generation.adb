@@ -797,21 +797,14 @@ package body Code_Generation is
             result : Unbounded_String := To_Unbounded_String("");
             --  curr_char : Character;
             ascii_val : Integer := 0;
+            len : Integer := 0;
          begin
-            --  helper := ;
-            for i in 0 .. Natural(Utils.String_Vector.Length(helper)) - 1 loop
-               if i /= 0 and i /= Natural(Utils.String_Vector.Length(helper)) - 1 then
-                  temp := To_Unbounded_String(
-                                              To_String(temp) & 
-                                                To_String(helper(i)) &  --Utils.String_Vector.Element(helper, i)) & 
-                                                " "
-                                             );
-               end if;
-            end loop;
-            Put_Line(File => curr_vm_file, Item => "push constant" & To_String(t)'Length'Image);
+            len := To_String(temp)'Length - 35;
+            result := To_Unbounded_String(To_String(temp)(18..To_String(temp)'Length - 18));
+            Put_Line(File => curr_vm_file, Item => "push constant" & len'Image);
             Put_Line(File => curr_vm_file, Item => "call String.new 1");
-            for i in To_String(temp)'Range loop
-               ascii_val := Character'Pos(To_String(temp)(i));
+            for i in To_String(result)'Range loop
+               ascii_val := Character'Pos(To_String(result)(i));
                Put_Line(File => curr_vm_file, Item => "push constant" & ascii_val'Image);
                Put_Line(File => curr_vm_file, Item => "call String.appendChar 2");
             end loop;
@@ -831,6 +824,7 @@ package body Code_Generation is
       elsif To_String(temp)(1..12) = "<identifier>" then
          declare
             name : Unbounded_String := To_Unbounded_String("");
+            subroutineName : Unbounded_String := To_Unbounded_String("");
             segment : Unbounded_String := To_Unbounded_String("");
             var_type : Unbounded_String := To_Unbounded_String("");
             id_num : Integer := 0;
@@ -866,6 +860,7 @@ package body Code_Generation is
             elsif To_String(temp) = "<symbol> . </symbol>" then
                -- subroutineName:
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
+               subroutineName := Utils.split_string(To_String(temp))(1);
                --# <identifier> subroutineName </identifier>
                Put_Line(To_String(temp));
                -- ( expressionList ):
