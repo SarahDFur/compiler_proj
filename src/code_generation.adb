@@ -501,16 +501,12 @@ package body Code_Generation is
    function parse_statements (t: Unbounded_String) return Unbounded_String is
       temp : Unbounded_String := t;
    begin
-      --  Put_Line(File => curr_vm_file, Item => "<statements>");
       while To_String(temp) /= "<symbol> } </symbol>" loop
          -- breakdown the statement
          -- statement procedure will return the first token in the next statement
          temp := parse_statement(temp);
          Put_Line(To_String(temp));
       end loop;
-      --  Put_Line(File => curr_vm_file, Item => "<symbol> } <symbol>");
-      -- ^ happens in the above level
-      --  Put_Line(File => curr_vm_file, Item => "</statements>");
       return temp;
    end parse_statements;
    
@@ -545,6 +541,7 @@ package body Code_Generation is
       varName : Unbounded_String := To_Unbounded_String("");
       segment : Unbounded_String := To_Unbounded_String("");
       index_of : Integer;
+      flag : Boolean := True;
    begin
       --  Put_Line(File => curr_vm_file, Item => "<letStatement>");
       -- let keyword:
@@ -572,9 +569,13 @@ package body Code_Generation is
       --# <symbol> [  |  = </symbol> 
       Put_Line(To_String(temp));
       if To_String(temp) = "<symbol> [ </symbol>" then
+         flag := False;
+         
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
          temp := parse_expression(temp); -- temp == next token == ] (by the end of this procedure)
+         Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & index_of'Image);
+         Put_Line(File => curr_vm_file, Item => "add");
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
          stop_line := stop_line + 1;
       end if;
@@ -584,8 +585,15 @@ package body Code_Generation is
          temp := parse_expression(temp);
       end if;
       -- Final commands:
-      Put_Line(File => curr_vm_file, Item => "pop " & To_String(segment) & " " & Integer'Image (index_of) (2 .. index_of'Image'Length));
-      Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & " " &  Integer'Image (index_of) (2 .. index_of'Image'Length));
+      if flag then
+         Put_Line(File => curr_vm_file, Item => "pop " & To_String(segment) & " " & Integer'Image (index_of) (2 .. index_of'Image'Length));
+      else
+         Put_Line(File => curr_vm_file, Item => "pop temp 0");
+         Put_Line(File => curr_vm_file, Item => "pop pointer 1");
+         Put_Line(File => curr_vm_file, Item => "push temp 0");
+         Put_Line(File => curr_vm_file, Item => "pop that 0");
+      end if;
+      --  Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & " " &  Integer'Image (index_of) (2 .. index_of'Image'Length));
       --  Put_Line(File => curr_vm_file, Item => "</letStatement>");
       -- temp == NEXT token:
       -- so that we can check if the next token in '}' 
@@ -843,12 +851,22 @@ package body Code_Generation is
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
                stop_line := stop_line + 1;
                temp := parse_expression(temp);
+               if To_String(segment) = "VAR" then
+                  segment := To_Unbounded_String("local");
+               elsif To_String(segment) = "ARG" then
+                  segment := To_Unbounded_String("argument");
+               elsif To_String(segment) = "FIELD" then
+                  segment := To_Unbounded_String("this");
+               elsif To_String(segment) = "STATIC" then
+                  null;
+               elsif To_String(segment) = "NONE" then
+                  null;
+               end if; 
                --# <symbol> ] </symbol>
                Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & id_num'Image);
                Put_Line(File => curr_vm_file, Item => "add");
                Put_Line(File => curr_vm_file, Item => "pop pointer 1");
                Put_Line(File => curr_vm_file, Item => "push that 0");
-               Put_Line(File => curr_vm_file, Item => "return");
                -- subroutineCall -> subroutineName '(' expressionList ')' :
             elsif To_String(temp) = "<symbol> ( </symbol>" then
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -870,8 +888,25 @@ package body Code_Generation is
                temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
                stop_line := stop_line + 1;
                temp := parse_expressionList(temp);
-            else
+               Put_Line(File => curr_vm_file, Item => "call " & To_String(name) & "." & To_String(subroutineName) & count_args'Image);
+               count_args := 0;
+            else -- One variable
                --  Put_Line(File => curr_vm_file, Item => "</term>");
+               var_type := SymbolTable.typeOf(name);
+               segment := SymbolTable.kindOf(name);
+               if To_String(segment) = "VAR" then
+                  segment := To_Unbounded_String("local");
+               elsif To_String(segment) = "ARG" then
+                  segment := To_Unbounded_String("argument");
+               elsif To_String(segment) = "FIELD" then
+                  segment := To_Unbounded_String("this");
+               elsif To_String(segment) = "STATIC" then
+                  null;
+               elsif To_String(segment) = "NONE" then
+                  null;
+               end if; 
+               id_num := SymbolTable.indexOf(name);
+               Put_Line(File => curr_vm_file, Item => "push " & To_String(segment) & id_num'Image);
                return temp;
             end if;
          end;
@@ -926,7 +961,7 @@ package body Code_Generation is
       -- subroutineCall -> subroutineName '(' expressionList ')' :
       if To_String(temp) = "<symbol> ( </symbol>" then -- not a built in method usually 
          result := To_Unbounded_String(To_String(curr_class_name) & "." & To_String(name)); -- className.subroutineName 
-         result := To_unbounded_String(To_String(result) & Integer'Image(SymbolTable.varCount(To_Unbounded_String("ARG"))));
+         result := To_unbounded_String(To_String(result)); --Integer'Image(SymbolTable.varCount(To_Unbounded_String("ARG"))));
 
          Put_Line(To_String(temp));
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -935,7 +970,8 @@ package body Code_Generation is
          
          temp := parse_expressionList(temp);
          Put_Line(To_String(temp));
-         Put_Line(File => curr_vm_file, Item => To_String(result));
+         Put_Line(File => curr_vm_file, Item => "call " & To_String(result) & count_args'Image);
+         count_args := 0;
          --  Put_Line(File => curr_vm_file, Item => "<symbol> ) </symbol>");
          -- subroutineCall -> (className | varName) '.' subroutineName '(' expressionList ')' :
       elsif To_String(temp) = "<symbol> . </symbol>" then
@@ -945,7 +981,7 @@ package body Code_Generation is
          stop_line := stop_line + 1;
          name := Utils.split_string(To_String(temp))(1); -- extracted subroutine name
          result := To_Unbounded_String(To_String(result) & "." & To_String(name));
-         result := To_unbounded_String(To_String(result) & " " & SymbolTable.varCount(To_Unbounded_String("ARG"))'Image);
+         result := To_unbounded_String(To_String(result));-- SymbolTable.varCount(To_Unbounded_String("ARG"))'Image);
          Put_Line(To_String(temp));
          -- ( expressionList ):
          temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
@@ -955,7 +991,8 @@ package body Code_Generation is
          stop_line := stop_line + 1;
 
          temp := parse_expressionList(temp);
-         Put_Line(File => curr_vm_file, Item => To_String(result));
+         Put_Line(File => curr_vm_file, Item => "call " & To_String(result) & count_args'Image);
+         count_args := 0;
       end if;
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
       stop_line := stop_line + 1;
@@ -971,13 +1008,15 @@ package body Code_Generation is
    begin
       --  Put_Line(File => curr_vm_file, Item => "<expressionList>");
       if To_String(temp) /= "<symbol> ) </symbol>" then
+         count_args := count_args + 1;
          temp := parse_expression(temp);
          Put_Line(To_String(temp));
          while To_String(temp) = "<symbol> , </symbol>" loop
             --  Put_Line(File => curr_vm_file, Item => To_String(temp));
             Put_Line(To_String(temp));
             temp := To_Unbounded_String(Get_Line(File => curr_xml_file));
-            stop_line := stop_line + 1;
+            stop_line := stop_line + 1;            
+            count_args := count_args + 1;
             temp := parse_expression(temp);
          end loop;
       end if;
