@@ -5,6 +5,8 @@ with Ada.Directories; use Ada.Directories;
 with Ada.Characters.Conversions; use Ada.Characters.Conversions;
 with SymbolTable; use SymbolTable;
 with Utils; use Utils;
+with Ada.Characters.Latin_1;
+use Ada.Characters.Latin_1;
 
 --# File Mode Types:
 --    In_File: Opens an existing file for reading.
@@ -31,7 +33,7 @@ package body SymbolTable is
    procedure startSubroutine is  -- will be called when we close a jack / xml file
       temp_class : Unbounded_String := To_Unbounded_String("");
       temp_method : Unbounded_String := To_Unbounded_String("");
-
+      temp : Unbounded_String := To_Unbounded_String("");
    begin
       -- reset constant vars for next xxxT.xml file that we read
       static_ids := 0;
@@ -44,12 +46,13 @@ package body SymbolTable is
       Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
     --  temp_class := To_Unbounded_String(To_String(temp_class) & Get_Line(in_symbol_table));
       while not End_Of_File(in_symbol_table_file) loop
-         --  temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
-         exit when To_String(temp_class) = "</class-scope>";
-         Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
+         exit when To_String(temp) = "</class-scope>";
+         temp := To_Unbounded_String(Get_Line(in_symbol_table_file));
+         temp_class := temp_class & Ada.Characters.Latin_1.LF; -- To_Unbounded_String(New_Line));
+         Append(temp_class, temp);
       end loop;
-            Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
-     -- temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
+      --  Append(temp_class, To_Unbounded_String(Get_Line(in_symbol_table_file)));
+      -- temp_class := To_Unbounded_String(temp_class & Get_Line(in_symbol_table));
       --  while not End_Of_File(in_symbol_table_file) loop
       --     temp_method := To_Unbounded_String(To_String(temp_method) & Get_Line(in_symbol_table));
       --  end loop;
