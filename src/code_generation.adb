@@ -298,7 +298,7 @@ package body Code_Generation is
          func_info := func_info & count_locals'Image;
          
          Put_Line(File => out_sym_tbl, Item => "<method-scope> " & To_String(func_info));
-         Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." 
+         Put_Line(File => curr_vm_file, Item => "function " & To_String(curr_class_name) & "." 
                   & To_String(curr_func_name) & " " &  Integer'Image (count_locals) (2 .. count_locals'Image'Length));
          count_args := 0;
          count_locals := 0;
@@ -445,7 +445,7 @@ package body Code_Generation is
       --  Close(out_sym_tbl);
 
       -- Until NOW we entered into the symbol table all the parameters and local vars in method-scope
-      Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." & To_String(curr_func_name) & count_locals'Image);
+      --  Put_Line(File => curr_vm_file, Item => "function" & To_String(curr_class_name) & "." & To_String(curr_func_name) & count_locals'Image);
       -- statements:       
       -- send temp to the procedure so that we can check which type of statement it is
       temp := parse_statements(temp);
