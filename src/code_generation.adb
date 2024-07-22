@@ -326,6 +326,7 @@ package body Code_Generation is
       end if;
       
       temp := To_Unbounded_String(Get_Line(File => curr_xml_file)); 
+      stop_line := stop_line + 1;
       --# <keyword> void </keyword>  ||  parse_type(temp)
       Put_Line(To_String(temp));
       if To_String(temp) = "<keyword> void </keyword>" then
@@ -421,6 +422,7 @@ package body Code_Generation is
          --# <keyword> var </keyword>  ||  statements
          Put_Line(To_String(temp));
       end loop;   
+      Open(File => out_sym_tbl, Mode => Append_File, Name => To_String(sym_tbl_name));
       Put_Line(File => out_sym_tbl, Item => "</method-scope>");
       Close(out_sym_tbl);
       
